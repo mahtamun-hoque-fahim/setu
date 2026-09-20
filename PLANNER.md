@@ -116,7 +116,8 @@ Status: `[x]` done
 ### Phase 2, Core flows
 Status: `[ ]` pending
 
-- [ ] Neon project provisioned, real env vars set
+- [x] Neon project provisioned, local env vars set, schema pushed and seeded
+- [ ] Production env vars set on Vercel (deferred for now, deploy currently fails on this)
 - [ ] Sign up and sign in forms actually wired to Better Auth client
 - [ ] Create-link form on the dashboard (currently only the API exists)
 - [ ] Reserved-slug check surfaced in the UI, not just the API
