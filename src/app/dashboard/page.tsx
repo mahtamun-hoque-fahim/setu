@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { links } from "@/lib/db/schema";
+import { SignOutButton } from "@/components/sign-out-button";
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -22,7 +23,10 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-bg px-6 py-12 text-text">
       <div className="mx-auto max-w-3xl">
-        <h1 className="font-display text-2xl font-bold">Your links</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="font-display text-2xl font-bold">Your links</h1>
+          <SignOutButton />
+        </div>
 
         {myLinks.length === 0 ? (
           <p className="mt-6 text-text-muted">

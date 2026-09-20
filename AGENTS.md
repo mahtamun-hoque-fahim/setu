@@ -39,6 +39,12 @@ Execute automatically at the start of every session, before the first commit. Ne
 
 (Newest first. No cap, entries are never dropped or trimmed. Three to four lines per entry, not a paragraph. Updates automatically at the end of any session with substantive work. Every entry names its author, the Claude instance or collaborator who did the work, per Fahim's instance registry.)
 
+### 2026-09-21
+Author: claude-vivaldi
+- Did: Built the real sign-in/sign-up form at /login (single page, toggled mode, wired to Better Auth's client), added a sign-out button on the dashboard. Found and removed a redundant standalone /signup page that had been created in an earlier part of this session before context was trimmed, it duplicated what the new /login toggle already covers.
+- Decided: One page with a mode toggle instead of separate /login and /signup routes, less surface area, and Better Auth's client already gives signIn.email and signUp.email as parallel calls so there's no real cost to combining them.
+- Next: Create-link form on the dashboard (API already exists, no UI yet), reserved-slug error surfaced in that form, Vercel production env vars still pending (deferred, per Fahim).
+
 ### 2026-09-20
 Author: claude-vivaldi
 - Did: Scaffolded v1, Next.js 16 App Router project, Drizzle schema (links, scans, Better Auth tables), the redirect route with after()-based scan logging, dashboard and login page stubs, proxy guarding /dashboard, PLANNER/DESIGN_GUIDE/README/AGENTS docs. Fixed a real Better Auth schema mismatch caught by the build (table names needed to be singular, several columns were missing on session/account/verification). Pushed the initial commit to this repo (eb03c78). Added a dev-only seed script (npm run db:seed) that creates one test user through Better Auth's own signup API and one sample link.
