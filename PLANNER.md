@@ -119,8 +119,8 @@ Status: `[ ]` pending
 - [x] Neon project provisioned, local env vars set, schema pushed and seeded
 - [ ] Production env vars set on Vercel (deferred for now, deploy currently fails on this)
 - [x] Sign up and sign in forms actually wired to Better Auth client
-- [ ] Create-link form on the dashboard (currently only the API exists)
-- [ ] Reserved-slug check surfaced in the UI, not just the API
+- [x] Create-link form on the dashboard (currently only the API exists)
+- [x] Reserved-slug check surfaced in the UI, not just the API
 - [ ] `npm run lint` currently fails, ESLint 9's flat config crashes resolving eslint-config-next's plugin set (circular structure error), needs a config fix or a version bump once upstream resolves it. `npx tsc --noEmit` and `npm run build` both pass clean and were verified before this push.
 
 ### Phase 3, Polish
