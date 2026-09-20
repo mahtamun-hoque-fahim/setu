@@ -111,6 +111,7 @@ Status: `[x]` done
 - [x] Better Auth wired up (email and password)
 - [x] Proxy guarding `/dashboard`
 - [x] Redirect route with after()-based scan logging
+- [x] Dev-only seed script (test user plus one sample link)
 
 ### Phase 2, Core flows
 Status: `[ ]` pending

@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "db:seed": "tsx src/lib/db/seed.ts"
   },
   "dependencies": {
     "next": "^16.0.0",
@@ -33,6 +34,7 @@
     "tailwindcss": "^4.0.0",
     "@tailwindcss/postcss": "^4.0.0",
     "drizzle-kit": "^0.31.0",
+    "tsx": "^4.19.0",
     "eslint": "^9.17.0",
     "eslint-config-next": "^16.0.0",
     "@eslint/eslintrc": "^3.2.0"

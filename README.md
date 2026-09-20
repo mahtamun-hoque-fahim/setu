@@ -47,6 +47,7 @@ npm run typecheck    # tsc --noEmit
 npm run db:generate  # generate migration from schema
 npm run db:migrate   # apply migrations
 npm run db:push      # push schema directly, dev only
+npm run db:seed      # dev-only test user and one sample link
 ```
 
 ## Deploy
