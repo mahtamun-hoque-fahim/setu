@@ -39,6 +39,12 @@ Execute automatically at the start of every session, before the first commit. Ne
 
 (Newest first. No cap, entries are never dropped or trimmed. Three to four lines per entry, not a paragraph. Updates automatically at the end of any session with substantive work. Every entry names its author, the Claude instance or collaborator who did the work, per Fahim's instance registry.)
 
+### 2026-09-21 (accessibility pass)
+Author: claude-vivaldi
+- Did: Ran real WCAG contrast math on every color token pairing instead of assuming the palette was fine, found three genuine failures: text-faint was 2.6 to 3.0:1 against surface colors (needs 4.5:1 for normal text), border was 1.3:1 against bg (needs 3:1 for interactive UI boundaries like input outlines), and accent-hover dropped button-label contrast to 3.72:1 on hover. Fixed all three (text-faint to #868b9c, border to #545d80, accent-hover to a lighter #7291fb instead of a darker one). Fixed a heading-level skip on the landing page (h1 straight to h3, now h1 to h2). Marked purely decorative icons aria-hidden across the login form, create-link form, sign-out button, and landing page. Added a screen-reader caption and proper column scope to the scan-history table. Reviewed every page for mobile layout, already handled correctly from the initial build via sm: breakpoints and the table's overflow-x-auto wrapper, nothing needed changing there.
+- Decided: accent-hover got lighter rather than darker specifically to keep the button text readable, a darkened hover state is the more common convention but it was the actual cause of the contrast failure.
+- Next: Phase 3 is done. Only remaining item project-wide is the deferred Vercel production env vars.
+
 ### 2026-09-21
 Author: claude-vivaldi
 - Did: Built the real sign-in/sign-up form at /login (single page, toggled mode, wired to Better Auth's client), added a sign-out button on the dashboard. Found and removed a redundant standalone /signup page that had been created in an earlier part of this session before context was trimmed, it duplicated what the new /login toggle already covers. Added the create-link form on the dashboard, wired to the existing POST /api/links, surfacing reserved and taken slug errors inline. Each link in the list now links through to its (still-stub) detail page. Built the real per-link analytics detail page: scan history table with a lightweight user-agent parser for device and browser, country, referrer, timestamp, ordered newest first.

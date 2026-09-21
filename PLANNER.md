@@ -127,8 +127,8 @@ Status: `[ ]` pending
 Status: `[ ]` pending
 
 - [x] Per-link analytics detail (device, country, referrer breakdown)
-- [ ] Mobile responsiveness audit
-- [ ] Accessibility pass (WCAG 2.2 AA)
+- [x] Mobile responsiveness audit (reviewed every page; already handled via existing sm: breakpoints and the table's overflow-x-auto wrapper, no changes needed)
+- [x] Accessibility pass (WCAG 2.2 AA)
 - [ ] Production deploy verification
 
 ---

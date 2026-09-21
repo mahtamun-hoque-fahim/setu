@@ -98,7 +98,7 @@ export default function LoginPage() {
             disabled={loading}
             className="flex w-full items-center justify-center gap-2 rounded-md bg-accent px-4 py-2 font-semibold text-bg transition-colors hover:bg-accent-hover disabled:opacity-60"
           >
-            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
             {mode === "sign-in" ? "Sign in" : "Create account"}
           </button>
         </form>

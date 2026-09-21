@@ -13,14 +13,14 @@ CSS variables in `src/app/globals.css` (Tailwind v4, tokens auto-promote to util
   --color-bg: #0b0d12;
   --color-surface: #12151c;
   --color-surface-elevated: #1a1e28;
-  --color-border: #232838;
+  --color-border: #545d80;
 
   --color-text: #f4f5f7;
   --color-text-muted: #9ca1ae;
-  --color-text-faint: #5a5f6c;
+  --color-text-faint: #868b9c;
 
   --color-accent: #5b7cfa;
-  --color-accent-hover: #4763d6;
+  --color-accent-hover: #7291fb;
   --color-accent-faint: #5b7cfa1a;
 
   --color-success: #22c55e;
@@ -29,6 +29,8 @@ CSS variables in `src/app/globals.css` (Tailwind v4, tokens auto-promote to util
   --color-info: #38bdf8;
 }
 ```
+
+Verified against WCAG 2.2 AA, not eyeballed. `text-faint` and `border` were both revised once from their first-pass values after failing the actual contrast math (`text-faint` was 2.6 to 3.0:1 against surface colors, `border` was 1.3:1 against bg). Current values: `text-faint` clears 4.5:1 normal-text AA against bg, surface, and surface-elevated; `border` clears 3:1 non-text/UI-component contrast against bg, for input and card boundaries that need to read as distinct, interactive shapes. `accent-hover` moved from a darker shade to a lighter one for the same reason, a darker hover dropped the button label's own contrast below 4.5:1.
 
 ## Typography
 

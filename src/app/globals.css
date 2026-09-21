@@ -9,16 +9,16 @@
   --color-bg: #0b0d12;
   --color-surface: #12151c;
   --color-surface-elevated: #1a1e28;
-  --color-border: #232838;
+  --color-border: #545d80;
 
   /* Text */
   --color-text: #f4f5f7;
   --color-text-muted: #9ca1ae;
-  --color-text-faint: #5a5f6c;
+  --color-text-faint: #868b9c;
 
   /* Brand */
   --color-accent: #5b7cfa;
-  --color-accent-hover: #4763d6;
+  --color-accent-hover: #7291fb;
   --color-accent-faint: #5b7cfa1a;
 
   /* Semantic */

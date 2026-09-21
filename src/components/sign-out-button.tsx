@@ -16,7 +16,7 @@ export function SignOutButton() {
       }}
       className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm text-text-muted transition-colors hover:bg-surface-elevated hover:text-text"
     >
-      <LogOut className="h-4 w-4" />
+      <LogOut className="h-4 w-4" aria-hidden="true" />
       Sign out
     </button>
   );

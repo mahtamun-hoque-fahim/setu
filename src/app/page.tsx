@@ -19,22 +19,24 @@ export default function Home() {
           className="mt-10 inline-flex items-center gap-2 rounded-md bg-accent px-5 py-3 font-semibold text-bg transition-colors hover:bg-accent-hover"
         >
           Get started
-          <ArrowRight className="h-4 w-4" />
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
         </a>
 
         <div className="mt-20 grid grid-cols-1 gap-6 sm:grid-cols-3">
           <Feature
-            icon={<ScanLine className="h-5 w-5 text-accent" />}
+            icon={<ScanLine className="h-5 w-5 text-accent" aria-hidden="true" />}
             title="Scan, land"
             body="One request, one redirect. Nothing rendered in between."
           />
           <Feature
-            icon={<Ban className="h-5 w-5 text-accent" />}
+            icon={<Ban className="h-5 w-5 text-accent" aria-hidden="true" />}
             title="No detour"
             body="No forced ads, no logo, no third-party page along the way."
           />
           <Feature
-            icon={<ChartNoAxesColumn className="h-5 w-5 text-accent" />}
+            icon={
+              <ChartNoAxesColumn className="h-5 w-5 text-accent" aria-hidden="true" />
+            }
             title="Your data"
             body="Scan count, device, and location, kept in your own dashboard."
           />
@@ -56,7 +58,7 @@ function Feature({
   return (
     <div className="rounded-lg border border-border bg-surface p-6 text-left">
       {icon}
-      <h3 className="mt-3 font-display text-base font-semibold">{title}</h3>
+      <h2 className="mt-3 font-display text-base font-semibold">{title}</h2>
       <p className="mt-2 text-sm text-text-muted">{body}</p>
     </div>
   );

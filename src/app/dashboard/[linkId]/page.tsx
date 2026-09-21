@@ -35,7 +35,7 @@ export default async function LinkDetailPage({
             href="/dashboard"
             className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Back to your links
           </Link>
           <p className="mt-6 text-text-muted">
@@ -58,7 +58,7 @@ export default async function LinkDetailPage({
           href="/dashboard"
           className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Back to your links
         </Link>
 
@@ -82,13 +82,26 @@ export default async function LinkDetailPage({
         ) : (
           <div className="mt-8 overflow-x-auto rounded-lg border border-border">
             <table className="w-full text-left text-sm">
+              <caption className="sr-only">
+                Scan history for /{link.slug}, newest first
+              </caption>
               <thead className="bg-surface text-text-muted">
                 <tr>
-                  <th className="px-4 py-2 font-medium">When</th>
-                  <th className="px-4 py-2 font-medium">Device</th>
-                  <th className="px-4 py-2 font-medium">Browser</th>
-                  <th className="px-4 py-2 font-medium">Country</th>
-                  <th className="px-4 py-2 font-medium">Referrer</th>
+                  <th scope="col" className="px-4 py-2 font-medium">
+                    When
+                  </th>
+                  <th scope="col" className="px-4 py-2 font-medium">
+                    Device
+                  </th>
+                  <th scope="col" className="px-4 py-2 font-medium">
+                    Browser
+                  </th>
+                  <th scope="col" className="px-4 py-2 font-medium">
+                    Country
+                  </th>
+                  <th scope="col" className="px-4 py-2 font-medium">
+                    Referrer
+                  </th>
                 </tr>
               </thead>
               <tbody>
