@@ -41,9 +41,9 @@ Execute automatically at the start of every session, before the first commit. Ne
 
 ### 2026-09-21
 Author: claude-vivaldi
-- Did: Built the real sign-in/sign-up form at /login (single page, toggled mode, wired to Better Auth's client), added a sign-out button on the dashboard. Found and removed a redundant standalone /signup page that had been created in an earlier part of this session before context was trimmed, it duplicated what the new /login toggle already covers. Added the create-link form on the dashboard, wired to the existing POST /api/links, surfacing reserved and taken slug errors inline. Each link in the list now links through to its (still-stub) detail page.
-- Decided: One page with a mode toggle instead of separate /login and /signup routes, less surface area, and Better Auth's client already gives signIn.email and signUp.email as parallel calls so there's no real cost to combining them.
-- Next: Phase 2's checklist is now fully done except Vercel production env vars, which are deferred per Fahim. Phase 3 is next: real per-link analytics detail, mobile and accessibility passes, then the deferred deploy.
+- Did: Built the real sign-in/sign-up form at /login (single page, toggled mode, wired to Better Auth's client), added a sign-out button on the dashboard. Found and removed a redundant standalone /signup page that had been created in an earlier part of this session before context was trimmed, it duplicated what the new /login toggle already covers. Added the create-link form on the dashboard, wired to the existing POST /api/links, surfacing reserved and taken slug errors inline. Each link in the list now links through to its (still-stub) detail page. Built the real per-link analytics detail page: scan history table with a lightweight user-agent parser for device and browser, country, referrer, timestamp, ordered newest first.
+- Decided: One page with a mode toggle instead of separate /login and /signup routes, less surface area, and Better Auth's client already gives signIn.email and signUp.email as parallel calls so there's no real cost to combining them. Scoped the detail-page query to id AND ownerId together, not just id, since the earlier stub had no ownership check at all, any signed-in user could have viewed another user's link stats by guessing the linkId in the URL.
+- Next: Phase 3 remaining: mobile responsiveness audit, accessibility pass, then the deferred Vercel deploy.
 
 ### 2026-09-20
 Author: claude-vivaldi

@@ -126,7 +126,7 @@ Status: `[ ]` pending
 ### Phase 3, Polish
 Status: `[ ]` pending
 
-- [ ] Per-link analytics detail (device, country, referrer breakdown)
+- [x] Per-link analytics detail (device, country, referrer breakdown)
 - [ ] Mobile responsiveness audit
 - [ ] Accessibility pass (WCAG 2.2 AA)
 - [ ] Production deploy verification
