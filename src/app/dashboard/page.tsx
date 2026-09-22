@@ -25,26 +25,30 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-bg px-6 py-12 text-text">
       <div className="mx-auto max-w-3xl">
-        <div className="flex items-center justify-between">
+        <div className="animate-fade-up flex items-center justify-between">
           <h1 className="font-display text-2xl font-bold">Your links</h1>
           <SignOutButton />
         </div>
 
-        <div className="mt-6">
+        <div className="animate-fade-up mt-6" style={{ animationDelay: "60ms" }}>
           <CreateLinkForm />
         </div>
 
         {myLinks.length === 0 ? (
-          <p className="mt-6 text-text-muted">
+          <p className="animate-fade-up mt-6 text-text-muted" style={{ animationDelay: "120ms" }}>
             No links yet. Create one to get started.
           </p>
         ) : (
           <ul className="mt-6 space-y-3">
-            {myLinks.map((link) => (
-              <li key={link.id}>
+            {myLinks.map((link, i) => (
+              <li
+                key={link.id}
+                className="animate-fade-up"
+                style={{ animationDelay: `${120 + i * 40}ms` }}
+              >
                 <Link
                   href={`/dashboard/${link.id}`}
-                  className="block rounded-lg border border-border bg-surface p-4 transition-colors hover:bg-surface-elevated"
+                  className="block rounded-lg border border-border bg-surface p-4 transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-0.5 hover:bg-surface-elevated hover:shadow-lg active:translate-y-0"
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-sm">/{link.slug}</span>

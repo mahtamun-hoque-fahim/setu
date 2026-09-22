@@ -14,7 +14,7 @@ export function SignOutButton() {
         await signOut();
         router.push("/login");
       }}
-      className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm text-text-muted transition-colors hover:bg-surface-elevated hover:text-text"
+      className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm text-text-muted transition-[background-color,color,transform] duration-150 ease-out hover:bg-surface-elevated hover:text-text active:scale-[0.97]"
     >
       <LogOut className="h-4 w-4" aria-hidden="true" />
       Sign out

@@ -7,6 +7,9 @@ import { getDb } from "@/lib/db";
 import { links, scans } from "@/lib/db/schema";
 import { parseUserAgent } from "@/lib/parse-user-agent";
 
+const backLinkClass =
+  "inline-flex items-center gap-2 text-sm text-text-muted transition-colors duration-150 ease-out hover:text-text";
+
 export default async function LinkDetailPage({
   params,
 }: {
@@ -31,14 +34,11 @@ export default async function LinkDetailPage({
     return (
       <main className="min-h-screen bg-bg px-6 py-12 text-text">
         <div className="mx-auto max-w-3xl">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text"
-          >
+          <Link href="/dashboard" className={backLinkClass}>
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Back to your links
           </Link>
-          <p className="mt-6 text-text-muted">
+          <p className="animate-fade-up mt-6 text-text-muted">
             That link does not exist, or is not yours.
           </p>
         </div>
@@ -54,15 +54,12 @@ export default async function LinkDetailPage({
   return (
     <main className="min-h-screen bg-bg px-6 py-12 text-text">
       <div className="mx-auto max-w-3xl">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text"
-        >
+        <Link href="/dashboard" className={backLinkClass}>
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Back to your links
         </Link>
 
-        <div className="mt-4 flex items-center justify-between">
+        <div className="animate-fade-up mt-4 flex items-center justify-between">
           <div>
             <h1 className="font-mono text-2xl font-bold">/{link.slug}</h1>
             <p className="mt-1 truncate text-sm text-text-faint">
@@ -75,12 +72,18 @@ export default async function LinkDetailPage({
         </div>
 
         {linkScans.length === 0 ? (
-          <p className="mt-8 text-text-muted">
+          <p
+            className="animate-fade-up mt-8 text-text-muted"
+            style={{ animationDelay: "60ms" }}
+          >
             No scans yet. They will show up here as soon as this link gets
             used.
           </p>
         ) : (
-          <div className="mt-8 overflow-x-auto rounded-lg border border-border">
+          <div
+            className="animate-fade-up mt-8 overflow-x-auto rounded-lg border border-border"
+            style={{ animationDelay: "60ms" }}
+          >
             <table className="w-full text-left text-sm">
               <caption className="sr-only">
                 Scan history for /{link.slug}, newest first
@@ -110,7 +113,7 @@ export default async function LinkDetailPage({
                   return (
                     <tr
                       key={scan.id}
-                      className="border-t border-border bg-surface-elevated"
+                      className="border-t border-border bg-surface-elevated transition-colors duration-150 ease-out hover:bg-surface"
                     >
                       <td className="px-4 py-2 text-text-muted">
                         {new Date(scan.scannedAt).toLocaleString()}

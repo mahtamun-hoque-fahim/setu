@@ -51,7 +51,7 @@ export function CreateLinkForm() {
           <label htmlFor="slug" className="text-sm text-text-muted">
             Slug
           </label>
-          <div className="mt-1 flex items-center rounded-md border border-border bg-surface-elevated px-3">
+          <div className="mt-1 flex items-center rounded-md border border-border bg-surface-elevated px-3 transition-[border-color,box-shadow] duration-150 ease-out focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20">
             <span className="text-sm text-text-faint">/</span>
             <input
               id="slug"
@@ -77,14 +77,14 @@ export function CreateLinkForm() {
             placeholder="https://facebook.com/yourpage"
             value={destinationUrl}
             onChange={(e) => setDestinationUrl(e.target.value)}
-            className="mt-1 w-full rounded-md border border-border bg-surface-elevated px-3 py-2 text-sm text-text placeholder-text-faint focus:border-accent focus:outline-none"
+            className="mt-1 w-full rounded-md border border-border bg-surface-elevated px-3 py-2 text-sm text-text placeholder-text-faint transition-[border-color,box-shadow] duration-150 ease-out focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="flex items-center justify-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-bg transition-colors hover:bg-accent-hover disabled:opacity-60"
+          className="flex items-center justify-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-bg transition-[background-color,transform] duration-150 ease-out hover:bg-accent-hover active:scale-[0.97] disabled:active:scale-100 disabled:opacity-60"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -96,7 +96,7 @@ export function CreateLinkForm() {
       </div>
 
       {error && (
-        <p className="mt-3 text-sm text-danger" role="alert">
+        <p className="animate-fade-up mt-3 text-sm text-danger" role="alert">
           {error}
         </p>
       )}

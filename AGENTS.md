@@ -39,6 +39,12 @@ Execute automatically at the start of every session, before the first commit. Ne
 
 (Newest first. No cap, entries are never dropped or trimmed. Three to four lines per entry, not a paragraph. Updates automatically at the end of any session with substantive work. Every entry names its author, the Claude instance or collaborator who did the work, per Fahim's instance registry.)
 
+### 2026-09-21 (motion and visual pass)
+Author: claude-vivaldi
+- Did: Fahim called the UI generic and flat, fair critique. Ran a real motion audit (grepped every hover/transition/focus/active class across the codebase rather than guessing) and found: feature cards on the landing page had zero hover state, several text links had a hover color with no transition so it snapped instantly, no button anywhere had a press state, inputs had no focus glow despite the --shadow-glow token existing unused since day one, and nothing on any page had an entrance animation. Fixed all of it: added --ease-out/--ease-in-out/--ease-subtle tokens, fade-up and scale-in keyframes, a hero-glow radial gradient utility, staggered entrance on the landing hero, dashboard list, and scan table, active:scale press feedback on every button, focus rings on every input, and a real lift+shadow hover on cards instead of a flat color swap. Verified the actual compiled CSS output, not just the source, to confirm every new utility and token really generated.
+- Decided: CSS-only, no Framer Motion. Nothing in Setu right now needs gesture handling or exit-on-unmount animation (no modals, drawers, or toasts exist yet), so a JS animation library would be dependency weight without matching benefit. Revisit if that changes.
+- Next: This was a design-quality request, not a plan item, Phase 4 (launch and verify) is still what's actually open.
+
 ### 2026-09-21 (launch phase added)
 Author: claude-vivaldi
 - Did: Fahim asked why phase status wasn't being tracked consistently, and it was a fair catch: Phases 1 through 3 were tracked in PLANNER.md all along, but the launch and verification steps, redeploy, live test, real scan, dashboard confirmation, actual QR generation, had only ever been said in chat, never written into the plan as a real phase. Added Phase 4 to PLANNER.md now with those concrete steps, and rewrote the stale Next Steps list, which still referenced work finished days ago.

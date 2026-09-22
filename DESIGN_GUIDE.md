@@ -113,11 +113,18 @@ Use sparingly on dark theme, depth comes from surface lightness, not shadow.
 
 ## Animation defaults
 
-- Hover transitions: transition-colors duration-150 ease-out
-- Modal/drawer enter: transition-all duration-200 ease-out
-- Maximum UI animation: 300ms
+Applied to every page as of the motion pass on 2026-09-21, not just aspirational values.
 
-Always wrapped in `prefers-reduced-motion` (see globals.css).
+- Easing tokens (in globals.css `@theme`): `--ease-out` (`cubic-bezier(0.23, 1, 0.32, 1)`) for anything entering, exiting, or being pressed; used by default everywhere
+- Entrance: `animate-fade-up` (0.35s), applied with a staggered `animationDelay` (40 to 60ms per item) on hero content, dashboard list items, and table rows
+- Modal-style entrance: `animate-scale-in` (0.2s), used on the login card
+- Buttons: `active:scale-[0.97]` or `[0.98]` on every clickable button, none had this before the audit, buttons must confirm the press
+- Cards: `hover:-translate-y-0.5` or `-1` plus a shadow change, never a flat color-only hover
+- Inputs: `focus:ring-2 focus:ring-accent/20` plus a `transition-[border-color,box-shadow]`, using the `--shadow-glow` token that existed from day one but was never actually applied anywhere until this pass
+- Text links: always paired with `transition-colors duration-150 ease-out`, a bare `hover:text-*` with no transition was the most common bug this pass found
+- No Framer Motion. Nothing on this site needs gesture handling or exit animations yet, CSS transitions and keyframes cover everything here. Revisit this if a modal, drawer, or toast system gets built later, that's the point where a JS animation library actually earns its dependency weight
+
+Maximum UI animation: 350ms. Always wrapped in `prefers-reduced-motion` (see globals.css).
 
 ## Dark mode notes
 

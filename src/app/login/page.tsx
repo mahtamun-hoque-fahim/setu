@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { signIn, signUp } from "@/lib/auth-client";
 
+const inputClass =
+  "mt-1 w-full rounded-md border border-border bg-surface-elevated px-3 py-2 text-sm text-text placeholder-text-faint transition-[border-color,box-shadow] duration-150 ease-out focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20";
+
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
@@ -35,15 +38,15 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-bg text-text">
-      <div className="w-full max-w-sm rounded-lg border border-border bg-surface p-8">
+    <main className="hero-glow flex min-h-screen items-center justify-center bg-bg text-text">
+      <div className="animate-scale-in w-full max-w-sm rounded-lg border border-border bg-surface p-8">
         <h1 className="font-display text-xl font-semibold">
           {mode === "sign-in" ? "Sign in" : "Create an account"}
         </h1>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           {mode === "sign-up" && (
-            <div>
+            <div className="animate-fade-up">
               <label htmlFor="name" className="text-sm text-text-muted">
                 Name
               </label>
@@ -53,7 +56,7 @@ export default function LoginPage() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1 w-full rounded-md border border-border bg-surface-elevated px-3 py-2 text-sm text-text placeholder-text-faint focus:border-accent focus:outline-none"
+                className={inputClass}
               />
             </div>
           )}
@@ -68,7 +71,7 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full rounded-md border border-border bg-surface-elevated px-3 py-2 text-sm text-text placeholder-text-faint focus:border-accent focus:outline-none"
+              className={inputClass}
             />
           </div>
 
@@ -83,12 +86,12 @@ export default function LoginPage() {
               minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full rounded-md border border-border bg-surface-elevated px-3 py-2 text-sm text-text placeholder-text-faint focus:border-accent focus:outline-none"
+              className={inputClass}
             />
           </div>
 
           {error && (
-            <p className="text-sm text-danger" role="alert">
+            <p className="animate-fade-up text-sm text-danger" role="alert">
               {error}
             </p>
           )}
@@ -96,9 +99,11 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-md bg-accent px-4 py-2 font-semibold text-bg transition-colors hover:bg-accent-hover disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-md bg-accent px-4 py-2 font-semibold text-bg transition-[background-color,transform] duration-150 ease-out hover:bg-accent-hover active:scale-[0.98] disabled:active:scale-100 disabled:opacity-60"
           >
-            {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+            {loading && (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            )}
             {mode === "sign-in" ? "Sign in" : "Create account"}
           </button>
         </form>
@@ -109,7 +114,7 @@ export default function LoginPage() {
             setMode(mode === "sign-in" ? "sign-up" : "sign-in");
             setError(null);
           }}
-          className="mt-4 text-sm text-text-muted hover:text-text"
+          className="mt-4 text-sm text-text-muted transition-colors duration-150 ease-out hover:text-text"
         >
           {mode === "sign-in"
             ? "No account yet? Create one"

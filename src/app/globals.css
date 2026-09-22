@@ -31,12 +31,61 @@
   --shadow-md: 0 4px 12px rgb(0 0 0 / 0.5);
   --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.6);
   --shadow-glow: 0 0 24px var(--color-accent-faint);
+
+  /* Motion, dark SaaS mood: crisp and fast, no bounce */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-subtle: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --animate-fade-up: fade-up 0.35s var(--ease-out) both;
+  --animate-scale-in: scale-in 0.2s var(--ease-out) both;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body), sans-serif;
+}
+
+.hero-glow {
+  position: relative;
+  isolation: isolate;
+}
+
+.hero-glow::before {
+  content: "";
+  position: absolute;
+  inset: -20% -10% auto -10%;
+  height: 60%;
+  background: radial-gradient(
+    ellipse 60% 50% at 50% 0%,
+    var(--color-accent-faint),
+    transparent 70%
+  );
+  z-index: -1;
+  pointer-events: none;
 }
 
 *:focus-visible {
