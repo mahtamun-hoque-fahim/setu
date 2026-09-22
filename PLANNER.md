@@ -124,22 +124,34 @@ Status: `[ ]` pending
 - [ ] `npm run lint` currently fails, ESLint 9's flat config crashes resolving eslint-config-next's plugin set (circular structure error), needs a config fix or a version bump once upstream resolves it. `npx tsc --noEmit` and `npm run build` both pass clean and were verified before this push.
 
 ### Phase 3, Polish
-Status: `[ ]` pending
+Status: `[x]` done
 
 - [x] Per-link analytics detail (device, country, referrer breakdown)
 - [x] Mobile responsiveness audit (reviewed every page; already handled via existing sm: breakpoints and the table's overflow-x-auto wrapper, no changes needed)
 - [x] Accessibility pass (WCAG 2.2 AA)
-- [ ] Production deploy verification
+
+### Phase 4, Launch and verify
+Status: `[ ]` pending
+
+- [x] Production env vars set on Vercel
+- [ ] Fix BETTER_AUTH_URL and NEXT_PUBLIC_APP_URL to use https, not http, then redeploy
+- [ ] Confirm the redeploy actually succeeds
+- [ ] Sign in on the live production URL (not localhost) and create the real link, real slug, real Facebook page as the destination
+- [ ] Scan the live link with an actual phone, confirm it redirects instantly with no ad and no logo, this is the entire reason the project exists
+- [ ] Confirm that scan shows up in the dashboard with device, country, and referrer, not just that the redirect worked
+- [ ] Generate the actual QR code pointing at the live link (any static generator works now, the URL is short and Setu's own)
 
 ---
 
 ## Next Steps
 
 In order:
-1. Provision the Neon database and set real env vars locally and on Vercel
-2. Run `npm run db:push` against the fresh database
-3. Build the sign-up/sign-in forms and the create-link form on the dashboard
-4. Deploy to Vercel and verify the redirect route end to end with a real QR code
+1. Fix BETTER_AUTH_URL and NEXT_PUBLIC_APP_URL on Vercel to use https, redeploy
+2. Confirm the redeploy succeeds
+3. Sign in on the live URL, create the real link with the real Facebook destination
+4. Scan it with an actual phone, confirm instant redirect, no ad, no logo
+5. Confirm the scan appears in the dashboard
+6. Generate the actual QR code pointing at the live link
 
 ---
 

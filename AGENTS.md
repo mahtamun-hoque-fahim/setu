@@ -39,6 +39,12 @@ Execute automatically at the start of every session, before the first commit. Ne
 
 (Newest first. No cap, entries are never dropped or trimmed. Three to four lines per entry, not a paragraph. Updates automatically at the end of any session with substantive work. Every entry names its author, the Claude instance or collaborator who did the work, per Fahim's instance registry.)
 
+### 2026-09-21 (launch phase added)
+Author: claude-vivaldi
+- Did: Fahim asked why phase status wasn't being tracked consistently, and it was a fair catch: Phases 1 through 3 were tracked in PLANNER.md all along, but the launch and verification steps, redeploy, live test, real scan, dashboard confirmation, actual QR generation, had only ever been said in chat, never written into the plan as a real phase. Added Phase 4 to PLANNER.md now with those concrete steps, and rewrote the stale Next Steps list, which still referenced work finished days ago.
+- Decided: Status updates should state current phase and what's left as a matter of course going forward, not only when a phase closes out.
+- Next: Phase 4's actual items, starting with fixing the http to https env var mistake and redeploying.
+
 ### 2026-09-21 (accessibility pass)
 Author: claude-vivaldi
 - Did: Ran real WCAG contrast math on every color token pairing instead of assuming the palette was fine, found three genuine failures: text-faint was 2.6 to 3.0:1 against surface colors (needs 4.5:1 for normal text), border was 1.3:1 against bg (needs 3:1 for interactive UI boundaries like input outlines), and accent-hover dropped button-label contrast to 3.72:1 on hover. Fixed all three (text-faint to #868b9c, border to #545d80, accent-hover to a lighter #7291fb instead of a darker one). Fixed a heading-level skip on the landing page (h1 straight to h3, now h1 to h2). Marked purely decorative icons aria-hidden across the login form, create-link form, sign-out button, and landing page. Added a screen-reader caption and proper column scope to the scan-history table. Reviewed every page for mobile layout, already handled correctly from the initial build via sm: breakpoints and the table's overflow-x-auto wrapper, nothing needed changing there.
