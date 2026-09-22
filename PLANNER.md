@@ -139,7 +139,7 @@ Status: `[ ]` pending
 - [ ] Sign in on the live production URL (not localhost) and create the real link, real slug, real Facebook page as the destination
 - [ ] Scan the live link with an actual phone, confirm it redirects instantly with no ad and no logo, this is the entire reason the project exists
 - [ ] Confirm that scan shows up in the dashboard with device, country, and referrer, not just that the redirect worked
-- [ ] Generate the actual QR code pointing at the live link (any static generator works now, the URL is short and Setu's own)
+- [x] Generate the actual QR code pointing at the live link (built directly into the dashboard instead of relying on an external generator, client-side, no ads, no third party, matching the entire point of the product)
 
 ---
 

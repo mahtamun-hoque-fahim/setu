@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { links, scans } from "@/lib/db/schema";
 import { parseUserAgent } from "@/lib/parse-user-agent";
+import { LinkQrCode } from "@/components/link-qr-code";
 
 const backLinkClass =
   "inline-flex items-center gap-2 text-sm text-text-muted transition-colors duration-150 ease-out hover:text-text";
@@ -51,6 +52,8 @@ export default async function LinkDetailPage({
     orderBy: desc(scans.scannedAt),
   });
 
+  const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL}/${link.slug}`;
+
   return (
     <main className="min-h-screen bg-bg px-6 py-12 text-text">
       <div className="mx-auto max-w-3xl">
@@ -69,6 +72,10 @@ export default async function LinkDetailPage({
           <span className="rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-text-muted">
             {linkScans.length} scans
           </span>
+        </div>
+
+        <div className="mt-6">
+          <LinkQrCode url={publicUrl} slug={link.slug} />
         </div>
 
         {linkScans.length === 0 ? (

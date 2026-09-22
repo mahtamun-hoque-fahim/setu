@@ -39,6 +39,12 @@ Execute automatically at the start of every session, before the first commit. Ne
 
 (Newest first. No cap, entries are never dropped or trimmed. Three to four lines per entry, not a paragraph. Updates automatically at the end of any session with substantive work. Every entry names its author, the Claude instance or collaborator who did the work, per Fahim's instance registry.)
 
+### 2026-09-21 (QR code generation)
+Author: claude-vivaldi
+- Did: Fahim pointed out, correctly, that a QR/link platform generating no QR codes itself was a real gap, that's the entire complaint this project started from. Added qrcode.react and a LinkQrCode component, client-side canvas rendering plus a PNG download button, on the link detail page. No external service, no ads, no logo, matching the product's own premise.
+- Decided: Canvas over SVG specifically so "Download PNG" works as a direct toDataURL call, PNG is what most people actually want for printing on a physical card.
+- Next: Phase 4 remaining: fix BETTER_AUTH_URL/NEXT_PUBLIC_APP_URL to https and redeploy, then the live-test steps.
+
 ### 2026-09-21 (motion and visual pass)
 Author: claude-vivaldi
 - Did: Fahim called the UI generic and flat, fair critique. Ran a real motion audit (grepped every hover/transition/focus/active class across the codebase rather than guessing) and found: feature cards on the landing page had zero hover state, several text links had a hover color with no transition so it snapped instantly, no button anywhere had a press state, inputs had no focus glow despite the --shadow-glow token existing unused since day one, and nothing on any page had an entrance animation. Fixed all of it: added --ease-out/--ease-in-out/--ease-subtle tokens, fade-up and scale-in keyframes, a hero-glow radial gradient utility, staggered entrance on the landing hero, dashboard list, and scan table, active:scale press feedback on every button, focus rings on every input, and a real lift+shadow hover on cards instead of a flat color swap. Verified the actual compiled CSS output, not just the source, to confirm every new utility and token really generated.

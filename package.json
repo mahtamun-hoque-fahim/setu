@@ -24,7 +24,8 @@
     "lucide-react": "^0.469.0",
     "@fontsource/syne": "^5.1.0",
     "@fontsource/onest": "^5.1.0",
-    "@fontsource/jetbrains-mono": "^5.1.0"
+    "@fontsource/jetbrains-mono": "^5.1.0",
+    "qrcode.react": "^4.2.0"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
