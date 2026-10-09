@@ -7,6 +7,7 @@ import { getDb } from "@/lib/db";
 import { links, scans } from "@/lib/db/schema";
 import { parseUserAgent } from "@/lib/parse-user-agent";
 import { LinkQrCode } from "@/components/link-qr-code";
+import { EditDestinationForm } from "@/components/edit-destination-form";
 
 const backLinkClass =
   "inline-flex items-center gap-2 text-sm text-text-muted transition-colors duration-150 ease-out hover:text-text";
@@ -72,6 +73,13 @@ export default async function LinkDetailPage({
           <span className="rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-text-muted">
             {linkScans.length} scans
           </span>
+        </div>
+
+        <div className="animate-fade-up mt-6" style={{ animationDelay: "30ms" }}>
+          <EditDestinationForm
+            linkId={link.id}
+            currentUrl={link.destinationUrl}
+          />
         </div>
 
         <div className="mt-6">

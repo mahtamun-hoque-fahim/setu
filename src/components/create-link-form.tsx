@@ -27,11 +27,9 @@ export function CreateLinkForm() {
     if (!res.ok) {
       const message = await res.text();
       setError(
-        res.status === 409
-          ? message // "That slug is reserved" or "That slug is already taken"
-          : res.status === 400
-            ? "Enter both a slug and a destination URL"
-            : "Something went wrong, try again",
+        res.status === 409 || res.status === 400
+          ? message // the server's own wording: reserved or taken slug, or what is wrong with the URL
+          : "Something went wrong, try again",
       );
       return;
     }

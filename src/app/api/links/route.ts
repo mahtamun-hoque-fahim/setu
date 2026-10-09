@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { links } from "@/lib/db/schema";
 import { isReservedSlug } from "@/lib/reserved-slugs";
 import { newId } from "@/lib/id";
+import { parseDestinationUrl } from "@/lib/validate-destination";
 
 export async function GET(request: Request) {
   const session = await auth.api.getSession({ headers: request.headers });
@@ -31,9 +32,14 @@ export async function POST(request: Request) {
   };
 
   if (!body.slug || !body.destinationUrl) {
-    return new Response("slug and destinationUrl are required", {
+    return new Response("Enter both a slug and a destination URL", {
       status: 400,
     });
+  }
+
+  const destination = parseDestinationUrl(body.destinationUrl);
+  if (!destination.ok) {
+    return new Response(destination.error, { status: 400 });
   }
 
   if (isReservedSlug(body.slug)) {
@@ -54,7 +60,7 @@ export async function POST(request: Request) {
     .values({
       id: newId(),
       slug: body.slug,
-      destinationUrl: body.destinationUrl,
+      destinationUrl: destination.url,
       ownerId: session.user.id,
     })
     .returning();

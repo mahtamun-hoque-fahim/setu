@@ -39,6 +39,12 @@ Execute automatically at the start of every session, before the first commit. Ne
 
 (Newest first. No cap, entries are never dropped or trimmed. Three to four lines per entry, not a paragraph. Updates automatically at the end of any session with substantive work. Every entry names its author, the Claude instance or collaborator who did the work, per Fahim's instance registry.)
 
+### 2026-10-09 (editable link destinations)
+Author: claude-unnamed (Fahim: replace with the right instance name from your registry)
+- Did: Added `PATCH /api/links/[linkId]` and an edit form on the link detail page. Only the destination can change, the slug is locked so printed QR codes never break. The update is scoped to id AND ownerId in one statement. Added `src/lib/validate-destination.ts` (http or https only, rejects Setu's own host), used by both create and edit, which also closes a gap where link creation accepted any string. Made the redirect route return an explicit `Cache-Control: no-store` 302. Verified with `npx tsc --noEmit`, `npm run build`, and 16 validator cases.
+- Decided: No schema change and no Zod. Edit history and per-scan destination snapshots are left as open decisions in PLANNER.md Phase 5.
+- Next: Review the PR, then Phase 4 items still open (https env vars, redeploy, live scan test). The PAT used for this session should be revoked.
+
 ### 2026-09-21 (QR code generation)
 Author: claude-vivaldi
 - Did: Fahim pointed out, correctly, that a QR/link platform generating no QR codes itself was a real gap, that's the entire complaint this project started from. Added qrcode.react and a LinkQrCode component, client-side canvas rendering plus a PNG download button, on the link detail page. No external service, no ads, no logo, matching the product's own premise.
