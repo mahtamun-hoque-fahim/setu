@@ -48,6 +48,12 @@
 3. `POST /api/links` checks the slug isn't reserved and isn't already taken
 4. Link is created, owned by that user, and appears in the dashboard list with a live scan count
 
+### Flow 3: Owner edits where a link points
+1. Owner opens a link's detail page at `/dashboard/[linkId]`
+2. Changes the destination URL in the edit form and saves, which sends `PATCH /api/links/[linkId]` with `{ destinationUrl }`
+3. The URL is validated (http or https only, not a Setu address), then updated only if the link belongs to the signed-in user
+4. The slug and the QR code do not change. Codes already printed or scanned keep working and land on the new destination from the next scan on
+
 ---
 
 ## DB Schema
@@ -85,6 +91,7 @@ Standard Better Auth tables (Drizzle adapter, Postgres provider). Table names ar
 | GET | /[slug] | none | — | 302 redirect, or 404 |
 | GET | /api/links | session | — | Link[] (owner's links) |
 | POST | /api/links | session | `{ slug, destinationUrl }` | Link, 201 |
+| PATCH | /api/links/[linkId] | session, owner only | `{ destinationUrl }` | Link, or 400 (invalid URL), 404 (not found or not yours) |
 | ALL | /api/auth/[...all] | n/a | Better Auth internal routes | Better Auth |
 
 ---
@@ -141,6 +148,14 @@ Status: `[ ]` pending
 - [ ] Confirm that scan shows up in the dashboard with device, country, and referrer, not just that the redirect worked
 - [x] Generate the actual QR code pointing at the live link (built directly into the dashboard instead of relying on an external generator, client-side, no ads, no third party, matching the entire point of the product)
 
+### Phase 5, Post-launch features
+Status: `[ ]` in progress
+
+- [x] Edit the destination of an existing link (slug and QR code stay the same)
+- [x] Destination validation shared by create and edit (http or https only, no links back to Setu)
+- [ ] Decide whether to keep an edit history (old destination, new destination, timestamp) for abuse investigation
+- [ ] Decide whether to snapshot the destination on each scan row, so analytics can show scans before and after an edit
+
 ---
 
 ## Next Steps
@@ -162,3 +177,11 @@ In order:
 **2026-09-20.** Used Next's `after()` for scan logging instead of awaiting the insert before redirecting, so analytics can never add latency to the person scanning.
 
 **2026-09-20.** Deferred Cloudflare Workers mirror for v1. The stack default is dual-deploy, but a single-region redirect service doesn't need it yet, and it adds `wrangler.jsonc`/`open-next.config.ts` overhead this project doesn't benefit from at this size.
+
+**2026-10-09.** Link editing changes the destination only, never the slug. The QR code encodes the slug URL, so a renamed slug would break every code already printed.
+
+**2026-10-09.** The redirect route now builds its 302 by hand with `Cache-Control: no-store` instead of `Response.redirect`, because destinations are editable and a cached redirect would keep sending scanners to the old place. A 302 is already not cached by default, this makes it explicit and covers proxies and CDNs.
+
+**2026-10-09.** Destination validation lives in one helper (`src/lib/validate-destination.ts`) used by both create and edit. It allows only http and https and rejects Setu's own host. Link creation previously accepted any string, so this also closes that gap. A hand-written helper instead of Zod, since this is one field and it avoids a new dependency.
+
+**2026-10-09.** No schema change for editing, so there is no migration to run. Edit history and per-scan destination snapshots are listed as open decisions in Phase 5.

@@ -34,5 +34,14 @@ export async function GET(
     });
   });
 
-  return Response.redirect(link.destinationUrl, 302);
+  // Destinations are editable, so this response must never be cached by a
+  // browser, proxy or CDN. A cached redirect would keep sending scanners to
+  // the old destination after the owner changed it.
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: link.destinationUrl,
+      "Cache-Control": "no-store",
+    },
+  });
 }
