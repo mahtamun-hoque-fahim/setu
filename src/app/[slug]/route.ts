@@ -31,6 +31,8 @@ export async function GET(
       userAgent: request.headers.get("user-agent") ?? undefined,
       country,
       referrer: request.headers.get("referer") ?? undefined,
+      // Snapshot where this scan was sent, the owner may edit it later.
+      destinationUrl: link.destinationUrl,
     });
   });
 
