@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
-import { links, scans } from "@/lib/db/schema";
+import { linkEdits, links, scans } from "@/lib/db/schema";
 import { parseUserAgent } from "@/lib/parse-user-agent";
 import { LinkQrCode } from "@/components/link-qr-code";
 import { EditDestinationForm } from "@/components/edit-destination-form";
@@ -53,6 +53,14 @@ export default async function LinkDetailPage({
     orderBy: desc(scans.scannedAt),
   });
 
+  // Most recent 20 edits is plenty for a glance, the table is indexed on
+  // (link_id, edited_at) so this stays cheap.
+  const edits = await db.query.linkEdits.findMany({
+    where: eq(linkEdits.linkId, link.id),
+    orderBy: desc(linkEdits.editedAt),
+    limit: 20,
+  });
+
   const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL}/${link.slug}`;
 
   return (
@@ -85,6 +93,35 @@ export default async function LinkDetailPage({
         <div className="mt-6">
           <LinkQrCode url={publicUrl} slug={link.slug} />
         </div>
+
+        {edits.length > 0 && (
+          <section
+            className="animate-fade-up mt-8"
+            style={{ animationDelay: "45ms" }}
+          >
+            <h2 className="font-display text-lg font-bold">Edit history</h2>
+            <ol className="mt-3 space-y-2">
+              {edits.map((edit) => (
+                <li
+                  key={edit.id}
+                  className="rounded-lg border border-border bg-surface p-3 text-sm"
+                >
+                  <p className="text-text-muted">
+                    {new Date(edit.editedAt).toLocaleString()}
+                  </p>
+                  <p className="mt-1 break-all text-text-faint">
+                    <span className="sr-only">From </span>
+                    {edit.previousUrl}
+                  </p>
+                  <p className="mt-1 break-all text-text">
+                    <span className="text-text-muted">To </span>
+                    {edit.newUrl}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
         {linkScans.length === 0 ? (
           <p
@@ -120,6 +157,9 @@ export default async function LinkDetailPage({
                   <th scope="col" className="px-4 py-2 font-medium">
                     Referrer
                   </th>
+                  <th scope="col" className="px-4 py-2 font-medium">
+                    Sent to
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -138,6 +178,12 @@ export default async function LinkDetailPage({
                       <td className="px-4 py-2">{scan.country ?? "Unknown"}</td>
                       <td className="px-4 py-2 truncate max-w-[10rem] text-text-faint">
                         {scan.referrer ?? "Direct"}
+                      </td>
+                      <td
+                        className="px-4 py-2 truncate max-w-[12rem] text-text-faint"
+                        title={scan.destinationUrl ?? undefined}
+                      >
+                        {scan.destinationUrl ?? "Not recorded"}
                       </td>
                     </tr>
                   );

@@ -4,6 +4,7 @@ import {
   timestamp,
   boolean,
   uniqueIndex,
+  index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -88,13 +89,45 @@ export const scans = pgTable("scans", {
   userAgent: text("user_agent"),
   country: text("country"),
   referrer: text("referrer"),
+  // The destination this scan was actually sent to. Snapshotted at scan time
+  // because the owner can edit a link's destination later. Null on scans
+  // recorded before this column existed.
+  destinationUrl: text("destination_url"),
 });
+
+export const linkEdits = pgTable(
+  "link_edits",
+  {
+    id: text("id").primaryKey(),
+    linkId: text("link_id")
+      .notNull()
+      .references(() => links.id, { onDelete: "cascade" }),
+    editedBy: text("edited_by")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    previousUrl: text("previous_url").notNull(),
+    newUrl: text("new_url").notNull(),
+    editedAt: timestamp("edited_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    linkEditedIdx: index("link_edits_link_id_edited_at_idx").on(
+      table.linkId,
+      table.editedAt,
+    ),
+  }),
+);
 
 export const linksRelations = relations(links, ({ many, one }) => ({
   scans: many(scans),
+  edits: many(linkEdits),
   owner: one(user, { fields: [links.ownerId], references: [user.id] }),
 }));
 
 export const scansRelations = relations(scans, ({ one }) => ({
   link: one(links, { fields: [scans.linkId], references: [links.id] }),
+}));
+
+export const linkEditsRelations = relations(linkEdits, ({ one }) => ({
+  link: one(links, { fields: [linkEdits.linkId], references: [links.id] }),
+  editor: one(user, { fields: [linkEdits.editedBy], references: [user.id] }),
 }));

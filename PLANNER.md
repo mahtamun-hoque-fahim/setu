@@ -40,7 +40,7 @@
 2. Request hits `app/[slug]/route.ts`
 3. Slug is looked up in the `links` table
 4. If found, the response redirects (302) to `destinationUrl` immediately
-5. After the redirect has been sent, the scan is logged (user agent, country, referrer, timestamp) via `after()`, so logging never delays the redirect
+5. After the redirect has been sent, the scan is logged (user agent, country, referrer, timestamp, and the destination it was sent to) via `after()`, so logging never delays the redirect
 
 ### Flow 2: Owner creates a branded link
 1. Owner signs in at `/login` (Better Auth, email and password)
@@ -51,7 +51,7 @@
 ### Flow 3: Owner edits where a link points
 1. Owner opens a link's detail page at `/dashboard/[linkId]`
 2. Changes the destination URL in the edit form and saves, which sends `PATCH /api/links/[linkId]` with `{ destinationUrl }`
-3. The URL is validated (http or https only, not a Setu address), then updated only if the link belongs to the signed-in user
+3. The URL is validated (http or https only, not a Setu address), then updated only if the link belongs to the signed-in user. The old and new URL are recorded in `link_edits` in the same transaction
 4. The slug and the QR code do not change. Codes already printed or scanned keep working and land on the new destination from the next scan on
 
 ---
@@ -81,6 +81,21 @@ Standard Better Auth tables (Drizzle adapter, Postgres provider). Table names ar
 | userAgent | text, nullable | raw header, parse client-side for device and browser |
 | country | text, nullable | from `x-vercel-ip-country` header on Vercel |
 | referrer | text, nullable | raw `referer` header |
+| destinationUrl | text, nullable | where this scan was sent, snapshotted at scan time because the owner can edit the destination later. Null on scans recorded before this column existed |
+
+### link_edits
+One row per real destination change. Saving the same URL again writes nothing.
+
+| column | type | notes |
+|---|---|---|
+| id | text PK | crypto.randomUUID() |
+| linkId | text, FK to links.id | cascade delete |
+| editedBy | text, FK to user.id | cascade delete |
+| previousUrl | text | destination before the edit |
+| newUrl | text | destination after the edit |
+| editedAt | timestamp | defaultNow |
+
+Index: `link_edits_link_id_edited_at_idx` on (linkId, editedAt).
 
 ---
 
@@ -153,8 +168,9 @@ Status: `[ ]` in progress
 
 - [x] Edit the destination of an existing link (slug and QR code stay the same)
 - [x] Destination validation shared by create and edit (http or https only, no links back to Setu)
-- [ ] Decide whether to keep an edit history (old destination, new destination, timestamp) for abuse investigation
-- [ ] Decide whether to snapshot the destination on each scan row, so analytics can show scans before and after an edit
+- [x] Edit history (old destination, new destination, who, when) in `link_edits`, shown on the link detail page
+- [x] Destination snapshotted on each scan row, shown as a "Sent to" column in the scan table
+- [ ] Apply the schema change to Neon (SQL in the PR description), before deploying this branch
 
 ---
 
@@ -184,4 +200,6 @@ In order:
 
 **2026-10-09.** Destination validation lives in one helper (`src/lib/validate-destination.ts`) used by both create and edit. It allows only http and https and rejects Setu's own host. Link creation previously accepted any string, so this also closes that gap. A hand-written helper instead of Zod, since this is one field and it avoids a new dependency.
 
-**2026-10-09.** No schema change for editing, so there is no migration to run. Edit history and per-scan destination snapshots are listed as open decisions in Phase 5.
+**2026-10-09.** Edit history and per-scan destination snapshots were added. Editing needs a schema change after all: a new `link_edits` table and a nullable `scans.destination_url` column. Both are additive, so old code keeps working against the new schema, which means the SQL can be applied to Neon before the deploy. Deploying first would make the scan insert fail inside `after()`, silently losing analytics, so the order matters.
+
+**2026-10-09.** The history row and the link update run through `db.batch()`, one transaction, because the neon-http driver has no interactive transactions. Existing scans were backfilled with each link's current destination, which is accurate only because no link had been edited yet. Scans recorded before the column existed and not backfilled show "Not recorded".

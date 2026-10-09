@@ -39,11 +39,17 @@ Execute automatically at the start of every session, before the first commit. Ne
 
 (Newest first. No cap, entries are never dropped or trimmed. Three to four lines per entry, not a paragraph. Updates automatically at the end of any session with substantive work. Every entry names its author, the Claude instance or collaborator who did the work, per Fahim's instance registry.)
 
+### 2026-10-09 (edit history and scan snapshots)
+Author: claude-vivaldi
+- Did: Added the `link_edits` table (old URL, new URL, who, when) and a nullable `scans.destination_url` column, so abuse reports can be investigated and analytics can tell scans before and after an edit apart. The PATCH endpoint now writes the link update and the history row together with `db.batch()`, since neon-http has no interactive transactions. The redirect route snapshots the destination in the existing `after()` insert, with no extra query. The detail page shows an Edit history list and a "Sent to" column. Ran the migration SQL twice against a local Postgres 16 built from the old schema, checked it is idempotent, checked the constraints match what `drizzle-kit generate` produces, and checked the backfill and cascades.
+- Decided: Backfill existing scans with each link's current destination, accurate only because no link had been edited yet. The SQL must reach Neon before this branch deploys, otherwise the scan insert fails inside `after()` and analytics are silently lost.
+- Next: Apply the SQL to Neon, merge, then the Phase 4 launch items.
+
 ### 2026-10-09 (editable link destinations)
-Author: claude-unnamed (Fahim: replace with the right instance name from your registry)
+Author: claude-vivaldi
 - Did: Added `PATCH /api/links/[linkId]` and an edit form on the link detail page. Only the destination can change, the slug is locked so printed QR codes never break. The update is scoped to id AND ownerId in one statement. Added `src/lib/validate-destination.ts` (http or https only, rejects Setu's own host), used by both create and edit, which also closes a gap where link creation accepted any string. Made the redirect route return an explicit `Cache-Control: no-store` 302. Verified with `npx tsc --noEmit`, `npm run build`, and 16 validator cases.
-- Decided: No schema change and no Zod. Edit history and per-scan destination snapshots are left as open decisions in PLANNER.md Phase 5.
-- Next: Review the PR, then Phase 4 items still open (https env vars, redeploy, live scan test). The PAT used for this session should be revoked.
+- Decided: No Zod, a hand-written helper is enough for one field.
+- Next: Edit history and scan snapshots, see the entry below. Then the Phase 4 items still open (https env vars, redeploy, live scan test). The PAT used for this session should be revoked.
 
 ### 2026-09-21 (QR code generation)
 Author: claude-vivaldi
