@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save } from "lucide-react";
+import { Check, CircleAlert, Loader2 } from "lucide-react";
+import {
+  buttonPrimary,
+  inputClass,
+  labelClass,
+  panelClass,
+} from "@/components/ui";
 
 export function EditDestinationForm({
   linkId,
@@ -66,50 +72,68 @@ export function EditDestinationForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-lg border border-border bg-surface p-4"
+      className={`${panelClass} flex flex-col gap-4 p-5 sm:p-6`}
     >
-      <label htmlFor="edit-destination" className="text-sm text-text-muted">
-        Destination URL
-      </label>
-      <div className="mt-1 flex flex-col gap-3 sm:flex-row">
-        <input
-          id="edit-destination"
-          type="url"
-          required
-          value={url}
-          onChange={(e) => {
-            setUrl(e.target.value);
-            setSaved(false);
-          }}
-          aria-describedby="edit-destination-hint"
-          className="w-full flex-1 rounded-md border border-border bg-surface-elevated px-3 py-2 text-sm text-text placeholder-text-faint transition-[border-color,box-shadow] duration-150 ease-out focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-        />
-        <button
-          type="submit"
-          disabled={loading || unchanged}
-          className="flex items-center justify-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-bg transition-[background-color,transform] duration-150 ease-out hover:bg-accent-hover active:scale-[0.97] disabled:active:scale-100 disabled:opacity-60"
-        >
-          {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          ) : (
-            <Save className="h-4 w-4" aria-hidden="true" />
-          )}
-          Save
-        </button>
+      <h2 className="text-2xl font-bold">Destination</h2>
+
+      <div>
+        <label htmlFor="edit-destination" className={labelClass}>
+          Where this link sends people
+        </label>
+        <div className="mt-1.5 flex flex-col gap-3 sm:flex-row">
+          <input
+            id="edit-destination"
+            type="url"
+            required
+            value={url}
+            onChange={(e) => {
+              setUrl(e.target.value);
+              setSaved(false);
+            }}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={
+              error ? "edit-destination-error edit-destination-hint" : "edit-destination-hint"
+            }
+            className={`${inputClass} flex-1 font-mono ${
+              error ? "border-destructive" : ""
+            }`}
+          />
+          <button
+            type="submit"
+            disabled={loading || unchanged}
+            className={buttonPrimary}
+          >
+            {loading && (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            )}
+            Save
+          </button>
+        </div>
+        <p id="edit-destination-hint" className="mt-3 text-sm text-muted-foreground">
+          Changing the destination does not change the slug or the QR code.
+          Codes already printed keep working and land on the new destination.
+        </p>
       </div>
 
-      <p id="edit-destination-hint" className="mt-2 text-sm text-text-faint">
-        Changing the destination does not change the slug or the QR code.
-        Codes already printed keep working and land on the new destination.
-      </p>
-
       {error && (
-        <p className="animate-fade-up mt-3 text-sm text-danger" role="alert">
+        <p
+          id="edit-destination-error"
+          role="alert"
+          className="animate-fade-up flex items-start gap-2 border-2 border-border bg-background p-3 text-sm font-medium shadow-hard-2"
+        >
+          <CircleAlert
+            className="mt-0.5 size-4 shrink-0 text-destructive"
+            aria-hidden="true"
+          />
           {error}
         </p>
       )}
       {saved && (
-        <p className="animate-fade-up mt-3 text-sm text-success" role="status">
+        <p
+          role="status"
+          className="animate-fade-up flex items-start gap-2 border-2 border-border bg-muted p-3 text-sm font-medium shadow-hard-2"
+        >
+          <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
           Saved. Scans now land on the new destination.
         </p>
       )}

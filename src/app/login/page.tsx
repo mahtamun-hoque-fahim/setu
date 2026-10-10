@@ -2,20 +2,32 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { CircleAlert, Eye, EyeOff, Loader2 } from "lucide-react";
 import { signIn, signUp } from "@/lib/auth-client";
+import { PageShell } from "@/components/page-shell";
+import {
+  buttonPrimary,
+  inputClass,
+  labelClass,
+  panelClass,
+} from "@/components/ui";
 
-const inputClass =
-  "mt-1 w-full rounded-md border border-border bg-surface-elevated px-3 py-2 text-sm text-text placeholder-text-faint transition-[border-color,box-shadow] duration-150 ease-out focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20";
+type Mode = "sign-in" | "sign-up";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
+  const [mode, setMode] = useState<Mode>("sign-in");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  function chooseMode(next: Mode) {
+    setMode(next);
+    setError(null);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,90 +49,147 @@ export default function LoginPage() {
     router.push("/dashboard");
   }
 
-  return (
-    <main className="hero-glow flex min-h-screen items-center justify-center bg-bg text-text">
-      <div className="animate-scale-in w-full max-w-sm rounded-lg border border-border bg-surface p-8">
-        <h1 className="font-display text-xl font-semibold">
-          {mode === "sign-in" ? "Sign in" : "Create an account"}
-        </h1>
+  const segment = (active: boolean) =>
+    `min-h-11 text-sm font-bold transition-colors duration-75 ${
+      active ? "bg-foreground text-background" : "hover:bg-muted"
+    }`;
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          {mode === "sign-up" && (
-            <div className="animate-fade-up">
-              <label htmlFor="name" className="text-sm text-text-muted">
-                Name
+  return (
+    <PageShell showSignIn={false}>
+      <div className="mx-auto flex w-full max-w-md flex-col items-center px-4 py-12 sm:py-16">
+        <div className="flex items-baseline gap-3">
+          <p className="font-heading text-5xl font-bold tracking-tighter">Setu</p>
+          <p lang="bn" className="font-bengali text-5xl font-bold">
+            সেতু
+          </p>
+        </div>
+        <p className="mt-3 text-center text-muted-foreground">
+          The bridge, not the detour.
+        </p>
+
+        <div className={`${panelClass} mt-8 w-full p-6 sm:p-8`}>
+          <h1 className="sr-only">
+            {mode === "sign-in" ? "Sign in" : "Create an account"}
+          </h1>
+
+          <div
+            role="group"
+            aria-label="Choose what to do"
+            className="grid grid-cols-2 gap-1 border-2 border-border p-1"
+          >
+            <button
+              type="button"
+              aria-pressed={mode === "sign-in"}
+              onClick={() => chooseMode("sign-in")}
+              className={segment(mode === "sign-in")}
+            >
+              Sign in
+            </button>
+            <button
+              type="button"
+              aria-pressed={mode === "sign-up"}
+              onClick={() => chooseMode("sign-up")}
+              className={segment(mode === "sign-up")}
+            >
+              Create account
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-5">
+            {mode === "sign-up" && (
+              <div>
+                <label htmlFor="name" className={labelClass}>
+                  Name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  required
+                  autoComplete="name"
+                  placeholder="Your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className={`${inputClass} mt-1.5`}
+                />
+              </div>
+            )}
+
+            <div>
+              <label htmlFor="email" className={labelClass}>
+                Email address
               </label>
               <input
-                id="name"
-                type="text"
+                id="email"
+                type="email"
                 required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className={inputClass}
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`${inputClass} mt-1.5`}
               />
             </div>
-          )}
 
-          <div>
-            <label htmlFor="email" className="text-sm text-text-muted">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
-            />
-          </div>
+            <div>
+              <label htmlFor="password" className={labelClass}>
+                Password
+              </label>
+              <div className="relative mt-1.5">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  minLength={8}
+                  autoComplete={
+                    mode === "sign-in" ? "current-password" : "new-password"
+                  }
+                  placeholder="At least 8 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`${inputClass} pr-12`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((shown) => !shown)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  className="absolute right-0 top-0 inline-flex size-11 items-center justify-center hover:text-primary"
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-4" aria-hidden="true" />
+                  ) : (
+                    <Eye className="size-4" aria-hidden="true" />
+                  )}
+                </button>
+              </div>
+            </div>
 
-          <div>
-            <label htmlFor="password" className="text-sm text-text-muted">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-
-          {error && (
-            <p className="animate-fade-up text-sm text-danger" role="alert">
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-md bg-accent px-4 py-2 font-semibold text-bg transition-[background-color,transform] duration-150 ease-out hover:bg-accent-hover active:scale-[0.98] disabled:active:scale-100 disabled:opacity-60"
-          >
-            {loading && (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            {error && (
+              <p
+                role="alert"
+                className="animate-fade-up flex items-start gap-2 border-2 border-border bg-background p-3 text-sm font-medium shadow-hard-2"
+              >
+                <CircleAlert
+                  className="mt-0.5 size-4 shrink-0 text-destructive"
+                  aria-hidden="true"
+                />
+                {error}
+              </p>
             )}
-            {mode === "sign-in" ? "Sign in" : "Create account"}
-          </button>
-        </form>
 
-        <button
-          type="button"
-          onClick={() => {
-            setMode(mode === "sign-in" ? "sign-up" : "sign-in");
-            setError(null);
-          }}
-          className="mt-4 text-sm text-text-muted transition-colors duration-150 ease-out hover:text-text"
-        >
-          {mode === "sign-in"
-            ? "No account yet? Create one"
-            : "Already have an account? Sign in"}
-        </button>
+            <button type="submit" disabled={loading} className={buttonPrimary}>
+              {loading && (
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              )}
+              {mode === "sign-in" ? "Sign in to Setu" : "Create account"}
+            </button>
+          </form>
+        </div>
+
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          No ads. Your scan data stays in your dashboard.
+        </p>
       </div>
-    </main>
+    </PageShell>
   );
 }
