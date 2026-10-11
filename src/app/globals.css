@@ -1,50 +1,101 @@
 @import "tailwindcss";
 
+/*
+ * Setu design tokens, "Brutalist White".
+ * Names follow the house token setup (chameleon references/tokens.md):
+ * components use bg-background, text-foreground, bg-primary and so on,
+ * never raw hex values. Light only, so there is no .dark block.
+ */
+:root {
+  /* Hard edges everywhere. Components should not use rounded-* at all. */
+  --radius: 0rem;
+
+  --background: #ffffff;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --popover: #ffffff;
+  --popover-foreground: #000000;
+
+  /* Electric blue, the single brand colour */
+  --primary: #0047ff;
+  --primary-foreground: #ffffff;
+
+  --secondary: #ffffff;
+  --secondary-foreground: #000000;
+
+  /* Zebra rows, subdued panels */
+  --muted: #f4f5f7;
+  --muted-foreground: #525252;
+
+  /* Hover and selected background only, not a brand colour */
+  --accent: #e8edff;
+  --accent-foreground: #000000;
+
+  --destructive: #d90429;
+  --success: #0b7a3b;
+  --warning: #8a5700;
+  --info: #0b5cad;
+
+  /* Structure is black. Soft dividers use foreground/20, not a token. */
+  --border: #000000;
+  --input: #000000;
+  --ring: #0047ff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+}
+
 @theme {
-  --font-display: "Syne", sans-serif;
-  --font-body: "Onest", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  /* Fonts are loaded with @fontsource in layout.tsx. Space Grotesk has no
+     Bengali glyphs, so Hind Siliguri sits second in the stack and covers
+     the Bengali text (the wordmark and the About page). */
+  --font-sans: "Space Grotesk", "Hind Siliguri", ui-sans-serif, system-ui,
+    sans-serif;
+  --font-heading: "Space Grotesk", "Hind Siliguri", ui-sans-serif, system-ui,
+    sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-bengali: "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
 
-  /* Surfaces */
-  --color-bg: #0b0d12;
-  --color-surface: #12151c;
-  --color-surface-elevated: #1a1e28;
-  --color-border: #545d80;
+  /* Hard offset shadows, the signature of the look. Size = offset in px. */
+  --shadow-hard-2: 2px 2px 0 0 var(--foreground);
+  --shadow-hard-3: 3px 3px 0 0 var(--foreground);
+  --shadow-hard-4: 4px 4px 0 0 var(--foreground);
 
-  /* Text */
-  --color-text: #f4f5f7;
-  --color-text-muted: #9ca1ae;
-  --color-text-faint: #868b9c;
-
-  /* Brand */
-  --color-accent: #5b7cfa;
-  --color-accent-hover: #7291fb;
-  --color-accent-faint: #5b7cfa1a;
-
-  /* Semantic */
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-info: #38bdf8;
-
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
-  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.5);
-  --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.6);
-  --shadow-glow: 0 0 24px var(--color-accent-faint);
-
-  /* Motion, dark SaaS mood: crisp and fast, no bounce */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-  --ease-subtle: cubic-bezier(0.4, 0, 0.2, 1);
-
-  --animate-fade-up: fade-up 0.35s var(--ease-out) both;
-  --animate-scale-in: scale-in 0.2s var(--ease-out) both;
+  --animate-fade-up: fade-up 0.25s var(--ease-out) both;
 }
 
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -52,45 +103,37 @@
   }
 }
 
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
+@layer base {
+  * {
+    border-color: var(--border);
   }
-  to {
-    opacity: 1;
-    transform: scale(1);
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
   }
-}
 
-body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-body), sans-serif;
-}
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
 
-.hero-glow {
-  position: relative;
-  isolation: isolate;
-}
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
 
-.hero-glow::before {
-  content: "";
-  position: absolute;
-  inset: -20% -10% auto -10%;
-  height: 60%;
-  background: radial-gradient(
-    ellipse 60% 50% at 50% 0%,
-    var(--color-accent-faint),
-    transparent 70%
-  );
-  z-index: -1;
-  pointer-events: none;
-}
-
-*:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  *:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

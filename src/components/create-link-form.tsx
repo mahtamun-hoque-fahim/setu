@@ -2,35 +2,53 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Plus } from "lucide-react";
+import { CircleAlert, Loader2, Plus } from "lucide-react";
+import {
+  buttonPrimary,
+  inputClass,
+  labelClass,
+  panelClass,
+} from "@/components/ui";
 
-export function CreateLinkForm() {
+export function CreateLinkForm({ host }: { host: string }) {
   const router = useRouter();
   const [slug, setSlug] = useState("");
   const [destinationUrl, setDestinationUrl] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [slugError, setSlugError] = useState<string | null>(null);
+  const [urlError, setUrlError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
+    setSlugError(null);
+    setUrlError(null);
+    setFormError(null);
     setLoading(true);
 
-    const res = await fetch("/api/links", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug, destinationUrl }),
-    });
+    let res: Response;
+    try {
+      res = await fetch("/api/links", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug, destinationUrl }),
+      });
+    } catch {
+      setLoading(false);
+      setFormError("Could not reach the server, check your connection");
+      return;
+    }
 
     setLoading(false);
 
     if (!res.ok) {
       const message = await res.text();
-      setError(
-        res.status === 409 || res.status === 400
-          ? message // the server's own wording: reserved or taken slug, or what is wrong with the URL
-          : "Something went wrong, try again",
-      );
+      // The server words these for people: 409 is always about the slug
+      // (taken or reserved), 400 is about the destination URL.
+      if (res.status === 409) setSlugError(message);
+      else if (res.status === 400) setUrlError(message);
+      else if (res.status === 401) setFormError("Your session expired, sign in again");
+      else setFormError("Something went wrong, try again");
       return;
     }
 
@@ -40,62 +58,105 @@ export function CreateLinkForm() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-lg border border-border bg-surface p-4"
-    >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <div className="flex-1">
-          <label htmlFor="slug" className="text-sm text-text-muted">
-            Slug
+    <form onSubmit={handleSubmit} className={`${panelClass} p-5 sm:p-7`}>
+      <h2 className="text-xl font-bold md:text-2xl">Create a short link</h2>
+
+      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-12 lg:items-start">
+        <div className="lg:col-span-4">
+          <label htmlFor="slug" className={labelClass}>
+            Short link
           </label>
-          <div className="mt-1 flex items-center rounded-md border border-border bg-surface-elevated px-3 transition-[border-color,box-shadow] duration-150 ease-out focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20">
-            <span className="text-sm text-text-faint">/</span>
+          <div
+            className={`mt-1.5 flex min-h-11 items-center border-2 bg-background px-3 focus-within:border-primary has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring ${
+              slugError ? "border-destructive" : "border-input"
+            }`}
+          >
+            <span
+              className="shrink-0 font-mono text-sm text-muted-foreground"
+              aria-hidden="true"
+            >
+              {host}/
+            </span>
             <input
               id="slug"
               type="text"
               required
               pattern="[a-zA-Z0-9\-]+"
-              placeholder="mahtamun"
+              title="Letters, numbers and hyphens only"
+              placeholder="your-name"
+              autoComplete="off"
+              spellCheck={false}
               value={slug}
               onChange={(e) => setSlug(e.target.value.trim())}
-              className="w-full bg-transparent px-1 py-2 text-sm text-text placeholder-text-faint focus:outline-none"
+              aria-invalid={slugError ? true : undefined}
+              aria-describedby={slugError ? "slug-error" : "slug-hint"}
+              className="min-h-10 w-full bg-transparent py-2 pl-1 font-mono text-sm placeholder:text-muted-foreground focus-visible:outline-hidden"
             />
           </div>
+          {slugError ? (
+            <p
+              id="slug-error"
+              role="alert"
+              className="animate-fade-up mt-2 flex items-start gap-1.5 text-sm font-medium text-destructive"
+            >
+              <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+              {slugError}
+            </p>
+          ) : (
+            <p id="slug-hint" className="mt-2 text-sm text-muted-foreground">
+              Letters, numbers and hyphens. It cannot be renamed later.
+            </p>
+          )}
         </div>
 
-        <div className="flex-[2]">
-          <label htmlFor="destinationUrl" className="text-sm text-text-muted">
+        <div className="lg:col-span-6">
+          <label htmlFor="destinationUrl" className={labelClass}>
             Destination URL
           </label>
           <input
             id="destinationUrl"
             type="url"
             required
-            placeholder="https://facebook.com/yourpage"
+            placeholder="https://yourwebsite.com/page"
             value={destinationUrl}
             onChange={(e) => setDestinationUrl(e.target.value)}
-            className="mt-1 w-full rounded-md border border-border bg-surface-elevated px-3 py-2 text-sm text-text placeholder-text-faint transition-[border-color,box-shadow] duration-150 ease-out focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+            aria-invalid={urlError ? true : undefined}
+            aria-describedby={urlError ? "url-error" : "url-hint"}
+            className={`${inputClass} mt-1.5 font-mono ${
+              urlError ? "border-destructive" : ""
+            }`}
           />
+          {urlError ? (
+            <p
+              id="url-error"
+              role="alert"
+              className="animate-fade-up mt-2 flex items-start gap-1.5 text-sm font-medium text-destructive"
+            >
+              <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+              {urlError}
+            </p>
+          ) : (
+            <p id="url-hint" className="mt-2 text-sm text-muted-foreground">
+              Only http and https links. You can change this later.
+            </p>
+          )}
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex items-center justify-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-bg transition-[background-color,transform] duration-150 ease-out hover:bg-accent-hover active:scale-[0.97] disabled:active:scale-100 disabled:opacity-60"
-        >
-          {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          ) : (
-            <Plus className="h-4 w-4" aria-hidden="true" />
-          )}
-          Create
-        </button>
+        <div className="lg:col-span-2 lg:pt-[1.625rem]">
+          <button type="submit" disabled={loading} className={`${buttonPrimary} w-full`}>
+            {loading ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Plus className="size-4" aria-hidden="true" />
+            )}
+            Create link
+          </button>
+        </div>
       </div>
 
-      {error && (
-        <p className="animate-fade-up mt-3 text-sm text-danger" role="alert">
-          {error}
+      {formError && (
+        <p role="alert" className="animate-fade-up mt-4 text-sm font-medium text-destructive">
+          {formError}
         </p>
       )}
     </form>

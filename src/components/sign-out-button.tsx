@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
 import { signOut } from "@/lib/auth-client";
 
 export function SignOutButton() {
@@ -14,9 +13,8 @@ export function SignOutButton() {
         await signOut();
         router.push("/login");
       }}
-      className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm text-text-muted transition-[background-color,color,transform] duration-150 ease-out hover:bg-surface-elevated hover:text-text active:scale-[0.97]"
+      className="min-h-11 px-1 text-sm font-semibold underline decoration-2 underline-offset-4 hover:text-primary"
     >
-      <LogOut className="h-4 w-4" aria-hidden="true" />
       Sign out
     </button>
   );

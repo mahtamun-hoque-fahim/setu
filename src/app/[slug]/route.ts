@@ -18,7 +18,17 @@ export async function GET(
   });
 
   if (!link) {
-    return new Response("Not found", { status: 404 });
+    // A route handler cannot render a page, and notFound() here returns an
+    // empty 404. Send scanners of an unknown slug to a small page that shows
+    // the branded 404 instead of a blank screen. no-store because the slug
+    // may be created later and a cached redirect would keep pointing here.
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: new URL("/link-not-found", request.url).toString(),
+        "Cache-Control": "no-store",
+      },
+    });
   }
 
   // Log the scan after the redirect response has already been sent,

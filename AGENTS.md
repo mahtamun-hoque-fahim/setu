@@ -17,6 +17,7 @@ Execute automatically at the start of every session, before the first commit. Ne
 - Dev server: `npm run dev`
 - Build: `npm run build`
 - Type check: `npm run typecheck`
+- Lint: `npm run lint`
 - DB push (dev only): `npm run db:push`
 - DB migrate (production): `npm run db:generate` then `npm run db:migrate`
 
@@ -26,6 +27,8 @@ Execute automatically at the start of every session, before the first commit. Ne
 - No em dashes and no eyebrow-style header labels in any generated text (docs, copy, commit messages)
 - The public redirect route (`src/app/[slug]/route.ts`) stays unauthenticated and fast; it must never gain a session check or a client-rendered page in the middle of the redirect
 - Scan logging always runs through `after()`, never awaited before the redirect response is sent
+- The only other response `/[slug]` may send is the unknown-slug redirect to `/link-not-found`. Both responses are 302 with `Cache-Control: no-store`, because destinations are editable and slugs can be created later
+- Colours come from tokens only (`bg-background`, `text-foreground`, `bg-primary`), never raw hex in a class name. Radius is 0. Shared class strings are in `src/components/ui.ts`, see DESIGN_GUIDE.md
 - Auth: Better Auth, session checked server-side via `auth.api.getSession()`, never client-only
 - New slugs are checked against `src/lib/reserved-slugs.ts` before being created
 - Single deploy target for now: Vercel. Do not add Cloudflare Workers config unless asked; PLANNER.md's Notes & decisions explains why it was deferred
@@ -38,6 +41,12 @@ Execute automatically at the start of every session, before the first commit. Ne
 ## Session Log
 
 (Newest first. No cap, entries are never dropped or trimmed. Three to four lines per entry, not a paragraph. Updates automatically at the end of any session with substantive work. Every entry names its author, the Claude instance or collaborator who did the work, per Fahim's instance registry.)
+
+### 2026-10-10 (UI redesign and About page)
+Author: claude-vivaldi
+- Did: Rebuilt the UI from the Brutalist White Stitch designs on new tokens (standard names, contrast checked), Space Grotesk, JetBrains Mono and Hind Siliguri. New About page (the story and who built it, written from Fahim's project notes), branded 404, `PageShell` with skip link. Dropped Stitch parts that claimed untrue things or had no feature behind them, list in DESIGN_GUIDE.md. Dashboard now uses one grouped count query, link detail shows a real total with the latest 50 scans. QR exports include the quiet zone, PNG and SVG. Fixed the ESLint config. Checked with `tsc`, `eslint`, `npm run build`, the refinery lint, and real screenshots at 1280px and 375px.
+- Decided: Unknown slugs redirect to `/link-not-found` because route handlers cannot render the branded 404. About page copy is a draft in Fahim's voice from his notes, he edits it.
+- Next: Review the PR (About page copy especially), merge, then the Phase 4 launch items (https env vars, redeploy, live phone scan). The PAT used this session should be revoked.
 
 ### 2026-10-09 (edit history and scan snapshots)
 Author: claude-vivaldi

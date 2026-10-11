@@ -39,7 +39,7 @@
 1. Phone camera or scanner app reads the QR code, which encodes `setu.app/[slug]`
 2. Request hits `app/[slug]/route.ts`
 3. Slug is looked up in the `links` table
-4. If found, the response redirects (302) to `destinationUrl` immediately
+4. If found, the response redirects (302, `Cache-Control: no-store`) to `destinationUrl` immediately. If not found, it redirects (302) to `/link-not-found`, a small page that renders the branded 404 with a real 404 status, because a route handler cannot render a page itself
 5. After the redirect has been sent, the scan is logged (user agent, country, referrer, timestamp, and the destination it was sent to) via `after()`, so logging never delays the redirect
 
 ### Flow 2: Owner creates a branded link
@@ -103,11 +103,25 @@ Index: `link_edits_link_id_edited_at_idx` on (linkId, editedAt).
 
 | Method | Path | Auth | Body | Response |
 |---|---|---|---|---|
-| GET | /[slug] | none | — | 302 redirect, or 404 |
-| GET | /api/links | session | — | Link[] (owner's links) |
+| GET | /[slug] | none | none | 302 to the destination, or 302 to /link-not-found (404 page) |
+| GET | /api/links | session | none | Link[] (owner's links) |
 | POST | /api/links | session | `{ slug, destinationUrl }` | Link, 201 |
 | PATCH | /api/links/[linkId] | session, owner only | `{ destinationUrl }` | Link, or 400 (invalid URL), 404 (not found or not yours) |
 | ALL | /api/auth/[...all] | n/a | Better Auth internal routes | Better Auth |
+
+---
+
+## Pages
+
+| Path | Auth | Purpose |
+|---|---|---|
+| / | public | Landing |
+| /about | public | The story of Setu and who built it |
+| /login | public | Sign in and create account |
+| /dashboard | session | List of links, create form |
+| /dashboard/[linkId] | session, owner only | Edit destination, QR code, edit history, scans |
+| /link-not-found | public | Branded 404 for an unknown slug (404 status) |
+| any unmatched path | public | Branded 404 (`app/not-found.tsx`) |
 
 ---
 
@@ -164,13 +178,27 @@ Status: `[ ]` pending
 - [x] Generate the actual QR code pointing at the live link (built directly into the dashboard instead of relying on an external generator, client-side, no ads, no third party, matching the entire point of the product)
 
 ### Phase 5, Post-launch features
-Status: `[ ]` in progress
+Status: `[x]` done
 
 - [x] Edit the destination of an existing link (slug and QR code stay the same)
 - [x] Destination validation shared by create and edit (http or https only, no links back to Setu)
 - [x] Edit history (old destination, new destination, who, when) in `link_edits`, shown on the link detail page
 - [x] Destination snapshotted on each scan row, shown as a "Sent to" column in the scan table
-- [ ] Apply the schema change to Neon (SQL in the PR description), before deploying this branch
+- [x] Schema change applied to Neon (October 2026)
+
+### Phase 6, UI redesign (Brutalist White)
+Status: `[ ]` in review
+
+- [x] Design tokens rewritten to the standard token names, contrast checked with a script
+- [x] Fonts: Space Grotesk, JetBrains Mono, Hind Siliguri (Bengali subset) via @fontsource, Syne and Onest removed
+- [x] Landing, sign in and create account, dashboard, link detail rebuilt from the Stitch designs
+- [x] About page, branded 404 page, unknown slugs sent to the 404 page
+- [x] Stale parts of the Stitch export dropped, see DESIGN_GUIDE.md
+- [x] QR exports include the quiet zone and can be downloaded as PNG or SVG
+- [x] Dashboard uses a grouped count query, link detail shows a real scan total with the latest 50 rows
+- [x] ESLint config fixed for Next.js 16, lint now runs
+- [ ] Review the About page copy (written from the project notes, the voice is Fahim's to adjust)
+- [ ] Merge, then redeploy
 
 ---
 
@@ -203,3 +231,11 @@ In order:
 **2026-10-09.** Edit history and per-scan destination snapshots were added. Editing needs a schema change after all: a new `link_edits` table and a nullable `scans.destination_url` column. Both are additive, so old code keeps working against the new schema, which means the SQL can be applied to Neon before the deploy. Deploying first would make the scan insert fail inside `after()`, silently losing analytics, so the order matters.
 
 **2026-10-09.** The history row and the link update run through `db.batch()`, one transaction, because the neon-http driver has no interactive transactions. Existing scans were backfilled with each link's current destination, which is accurate only because no link had been edited yet. Scans recorded before the column existed and not backfilled show "Not recorded".
+
+**2026-10-10.** The UI direction is Brutalist White, chosen after trying a minimal Material look in Google Stitch. Tokens use the standard shadcn-style names so the other skills (chameleon, aria, refinery) work unchanged. Fonts stay on @fontsource instead of next/font/google so builds do not depend on reaching Google Fonts.
+
+**2026-10-10.** Parts of the Stitch export were left out because they claimed things Setu does not do or have: "HTTP 301" (the redirect is a 302 on purpose, a 301 is cached by browsers and would break editable destinations), Forgot password, an Analytics page, a docs page, a status page, the throughput sparkline. DESIGN_GUIDE.md has the full list.
+
+**2026-10-10.** Unknown slugs redirect (302, no-store) to `/link-not-found` instead of returning a plain 404 body. Route handlers cannot render the branded page: `notFound()` returns an empty 404 and `NextResponse.rewrite` fails there with a 500. This only affects the failure path, the hot redirect path is unchanged. `link-not-found` and `about` are reserved slugs.
+
+**2026-10-10.** Presentation was split from data fetching for the dashboard and link detail (`DashboardView`, `LinkDetailView`). Pages keep auth and queries, views take plain props, which let the screens be rendered with fixture data and screenshotted at 375px and 1280px during the redesign.

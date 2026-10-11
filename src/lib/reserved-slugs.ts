@@ -4,11 +4,13 @@
  * Check every new slug against this list at creation time.
  */
 export const RESERVED_SLUGS = new Set([
+  "about",
   "admin",
   "api",
   "app",
   "auth",
   "dashboard",
+  "link-not-found",
   "login",
   "logout",
   "settings",
