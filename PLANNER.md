@@ -48,6 +48,20 @@
 3. `POST /api/links` checks the slug isn't reserved and isn't already taken
 4. Link is created, owned by that user, and appears in the dashboard list with a live scan count
 
+### Flow 4: Someone gets access (invite-only)
+1. A visitor opens `/request-access` and sends a name, an email and an optional note. A hidden honeypot field catches bots, there is one pending request per email, and the queue closes at 50 pending. The answer is always "Request received", so the form never reveals who is already known
+2. The admin opens `/admin`, reads the request, and approves or rejects it
+3. Approving issues an invite bound to that email: 16 random characters, valid 7 days, single use, stored only as a SHA-256 hash. The admin copies a join link and sends it themselves. The email and code sit in the URL fragment, so no server or log ever sees them
+4. The person opens the link, `/join` prefills the fields and wipes the fragment from the address bar, they choose a password, and Better Auth creates the account
+5. Account creation is locked inside Better Auth itself (`databaseHooks.user.create.before`): no code, a wrong code, a code for another email, an expired, revoked or spent code all mean no account, even for a direct POST to `/api/auth/sign-up/email`. One atomic UPDATE both checks and spends the code
+6. Existing accounts keep signing in as before, the lock only applies to new accounts
+
+### Flow 5: A destination is checked and a link can be switched off
+1. On create and on edit, a destination must pass the format rules (http or https, no username or password in the URL, no IP address or local host, no link shorteners, not Setu itself), then the admin's blocklist, then Google Safe Browsing when a key is set
+2. Safe Browsing fails open: if Google is unreachable the link is saved as `unchecked`. It only knows sites already reported, so it backs up invite-only access and the kill switch, it does not replace them
+3. The admin can disable any link, or block a whole website, which disables every active link already pointing there. A disabled link redirects to `/link-disabled` and never reveals its destination
+4. The admin can also delete an account, which removes its links, scans, history, sessions, invite request and invites
+
 ### Flow 3: Owner edits where a link points
 1. Owner opens a link's detail page at `/dashboard/[linkId]`
 2. Changes the destination URL in the edit form and saves, which sends `PATCH /api/links/[linkId]` with `{ destinationUrl }`
@@ -97,6 +111,46 @@ One row per real destination change. Saving the same URL again writes nothing.
 
 Index: `link_edits_link_id_edited_at_idx` on (linkId, editedAt).
 
+### links (additions)
+| column | type | notes |
+|---|---|---|
+| status | text, default 'active' | 'active' or 'disabled' |
+| disabledReason | text, nullable | shown to the owner |
+| disabledAt | timestamp, nullable | |
+| urlCheck | text, default 'unchecked' | 'clean', 'flagged' or 'unchecked' at the last save |
+
+### invite_requests
+| column | type | notes |
+|---|---|---|
+| id | text PK | |
+| name, email, note | text | email stored lowercase, note nullable |
+| status | text, default 'pending' | 'pending', 'approved', 'rejected' |
+| createdAt, reviewedAt | timestamp | |
+
+Unique partial index `invite_requests_pending_email_idx` on (email) where status is pending.
+
+### invites
+| column | type | notes |
+|---|---|---|
+| id | text PK | |
+| requestId | text, nullable FK to invite_requests.id | set null on delete |
+| email | text | the only email this invite works for |
+| codeHash | text | SHA-256 of the code, the code is never stored |
+| createdAt, expiresAt | timestamp | 7 day lifetime |
+| usedAt, revokedAt | timestamp, nullable | |
+| usedBy | text, nullable FK to user.id | set null on delete |
+
+Index: `invites_email_idx` on (email).
+
+### blocked_hosts
+| column | type | notes |
+|---|---|---|
+| host | text PK | lowercase, subdomains are blocked too |
+| reason | text, nullable | |
+| createdAt | timestamp | |
+
+Manual SQL for each schema change lives in `sql/`, because no migration history is committed.
+
 ---
 
 ## API Routes
@@ -107,7 +161,10 @@ Index: `link_edits_link_id_edited_at_idx` on (linkId, editedAt).
 | GET | /api/links | session | none | Link[] (owner's links) |
 | POST | /api/links | session | `{ slug, destinationUrl }` | Link, 201 |
 | PATCH | /api/links/[linkId] | session, owner only | `{ destinationUrl }` | Link, or 400 (invalid URL), 404 (not found or not yours) |
-| ALL | /api/auth/[...all] | n/a | Better Auth internal routes | Better Auth |
+| POST | /api/access-requests | none | `{ name, email, note, website }` | 200 always for a valid request, 400 invalid, 413 too large, 503 queue full |
+| ALL | /api/auth/[...all] | n/a | Better Auth internal routes. Sign-up needs `inviteCode` | Better Auth, 403 without a valid invite |
+
+Admin actions are Server Actions in `src/app/admin/actions.ts`, each one calls `requireAdmin()` first because a Server Action is a public endpoint.
 
 ---
 
@@ -117,7 +174,12 @@ Index: `link_edits_link_id_edited_at_idx` on (linkId, editedAt).
 |---|---|---|
 | / | public | Landing |
 | /about | public | The story of Setu and who built it |
-| /login | public | Sign in and create account |
+| /login | public | Sign in |
+| /request-access | public | Ask for an invite |
+| /join | public | Create an account with an invite code |
+| /privacy | public | What is stored, why, who sees it, how to delete it |
+| /admin | admin only (404 for everyone else) | Requests, invites, accounts, links, blocked websites |
+| /link-disabled | public | Notice shown for a disabled link |
 | /dashboard | session | List of links, create form |
 | /dashboard/[linkId] | session, owner only | Edit destination, QR code, edit history, scans |
 | /link-not-found | public | Branded 404 for an unknown slug (404 status) |
@@ -134,6 +196,8 @@ Index: `link_edits_link_id_edited_at_idx` on (linkId, editedAt).
 | BETTER_AUTH_SECRET | yes | Session signing secret, 32+ chars | (openssl rand -base64 32) |
 | BETTER_AUTH_URL | yes | Public app URL | https://setu.app |
 | NEXT_PUBLIC_APP_URL | yes | Same as above, client-readable | https://setu.app |
+| ADMIN_EMAIL | yes | The one admin. Whoever signs in with this email can open /admin | you@example.com |
+| SAFE_BROWSING_API_KEY | no | Google Safe Browsing key. Without it destinations are saved as unchecked | (Google Cloud console) |
 
 ---
 
@@ -200,6 +264,22 @@ Status: `[ ]` in review
 - [ ] Review the About page copy (written from the project notes, the voice is Fahim's to adjust)
 - [ ] Merge, then redeploy
 
+### Phase 7, Invite-only access and abuse controls
+Status: `[ ]` in review
+
+- [x] Request-an-invite page, admin approval, invite codes bound to an email, hashed, single use, 7 days
+- [x] Sign-up locked inside Better Auth, so a direct POST cannot bypass it
+- [x] Admin dashboard: requests, invites, accounts, links, blocked websites. No per-scan data
+- [x] Destination checks: format rules, blocklist, Google Safe Browsing (fails open)
+- [x] Disable a link, block a website, delete an account
+- [x] Server-side slug rules (letters, numbers, hyphens, 64 characters)
+- [x] Privacy page written from the real data map, with sample-data mockups (a WARDEN-DRAFT until confirmed)
+- [x] Vitest suite against an in-process Postgres (PGlite), written first
+- [ ] Run `sql/002-invite-only-and-abuse-controls.sql` in Neon BEFORE deploying this branch
+- [ ] Set `ADMIN_EMAIL` in Vercel, and optionally `SAFE_BROWSING_API_KEY`
+- [ ] Confirm the CONFIRM notes in `src/content/legal.ts`, then delete the WARDEN-DRAFT line in `src/app/privacy/page.tsx`
+- [ ] Post-build pipeline: aria audit, valley-of-death, sentinel, warden scan, Humanizer on the copy, light Airborne, Council POST, ticket-checker
+
 ---
 
 ## Next Steps
@@ -239,3 +319,17 @@ In order:
 **2026-10-10.** Unknown slugs redirect (302, no-store) to `/link-not-found` instead of returning a plain 404 body. Route handlers cannot render the branded page: `notFound()` returns an empty 404 and `NextResponse.rewrite` fails there with a 500. This only affects the failure path, the hot redirect path is unchanged. `link-not-found` and `about` are reserved slugs.
 
 **2026-10-10.** Presentation was split from data fetching for the dashboard and link detail (`DashboardView`, `LinkDetailView`). Pages keep auth and queries, views take plain props, which let the screens be rendered with fixture data and screenshotted at 375px and 1280px during the redesign.
+
+**2026-10-13.** Setu is invite-only. The lock is a Better Auth database hook, not a hidden form, because the sign-up endpoint is public and `disableSignUp` also blocks server-side sign-ups, so it cannot be used for a gated flow. The hook claims the invite with one atomic UPDATE. If the claim fails for any reason, including a database error, no account is created.
+
+**2026-10-13.** Invites are delivered by the admin copying a link, not by email. Resend cannot verify a vercel.app domain, so email delivery waits for a custom domain. The code and email are in the URL fragment so they never reach a server log.
+
+**2026-10-13.** The admin is whoever signs in with `ADMIN_EMAIL`. There is no role column to tamper with. The first account on a fresh database is created with `npm run invite -- <admin email>`, so nobody can register the admin's email first. Admin pages return a plain 404 to everyone else and every admin Server Action re-checks, because Server Actions are public endpoints.
+
+**2026-10-13.** The admin sees counts, never individual scans, by construction: no admin query returns a scan row, and a test asserts it. The privacy page says so, so that promise is backed by the code.
+
+**2026-10-13.** Better Auth stores the IP address and user agent of each login session. The privacy page says so. Scans, by contrast, store no IP address, only the country the host derives from the connection.
+
+**2026-10-13.** Retention gaps, written down instead of hidden: invite requests and expired session rows are not deleted automatically, and the privacy page says "until you ask me to delete it". Account deletion is admin-side only, on request by email, not self-service.
+
+**2026-10-13.** Tests run against PGlite, an in-process Postgres, with the real Drizzle schema pushed in. That is why constraints, the partial unique index and the atomic UPDATE are tested for real. They need no database on the machine and no network.

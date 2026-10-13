@@ -18,6 +18,8 @@ Execute automatically at the start of every session, before the first commit. Ne
 - Build: `npm run build`
 - Type check: `npm run typecheck`
 - Lint: `npm run lint`
+- Tests: `npm test` (Vitest, in-process Postgres via PGlite, write tests first)
+- Issue an invite: `npm run invite -- someone@example.com`
 - DB push (dev only): `npm run db:push`
 - DB migrate (production): `npm run db:generate` then `npm run db:migrate`
 
@@ -28,6 +30,11 @@ Execute automatically at the start of every session, before the first commit. Ne
 - The public redirect route (`src/app/[slug]/route.ts`) stays unauthenticated and fast; it must never gain a session check or a client-rendered page in the middle of the redirect
 - Scan logging always runs through `after()`, never awaited before the redirect response is sent
 - The only other response `/[slug]` may send is the unknown-slug redirect to `/link-not-found`. Both responses are 302 with `Cache-Control: no-store`, because destinations are editable and slugs can be created later
+- Sign-up is invite-only and the lock is `databaseHooks.user.create.before` in `src/lib/auth-factory.ts`. Never replace it with a form-only check, and never use `disableSignUp`, which also blocks server-side sign-ups. `src/lib/auth.ts` only instantiates the factory with the real database
+- Business logic takes a `Db` argument (`src/lib/db/types.ts`) and lives in `src/lib/*.ts` with tests, so it runs against PGlite. Routes, pages and Server Actions stay thin
+- Every admin page and every admin Server Action starts with `requireAdmin()`. Admin queries never return individual scans
+- Destination checks run through `prepareDestination()` on create and edit, never `parseDestinationUrl` alone. Safe Browsing fails open, never log its URL because it contains the API key
+- Schema changes are applied to Neon by hand from `sql/`, tested against PGlite. Run the SQL before deploying the code that needs it
 - Colours come from tokens only (`bg-background`, `text-foreground`, `bg-primary`), never raw hex in a class name. Radius is 0. Shared class strings are in `src/components/ui.ts`, see DESIGN_GUIDE.md
 - Auth: Better Auth, session checked server-side via `auth.api.getSession()`, never client-only
 - New slugs are checked against `src/lib/reserved-slugs.ts` before being created
@@ -41,6 +48,12 @@ Execute automatically at the start of every session, before the first commit. Ne
 ## Session Log
 
 (Newest first. No cap, entries are never dropped or trimmed. Three to four lines per entry, not a paragraph. Updates automatically at the end of any session with substantive work. Every entry names its author, the Claude instance or collaborator who did the work, per Fahim's instance registry.)
+
+### 2026-10-13 (invite-only access, abuse controls, privacy page)
+Author: claude-vivaldi
+- Did: Made Setu invite-only. Request-an-invite page, admin dashboard (requests, invites, accounts, links, blocked websites), invite codes bound to an email, hashed, single use, 7 days, and a sign-up lock inside Better Auth that a direct POST cannot bypass. Added destination checks (format rules, blocklist, Google Safe Browsing that fails open), a kill switch for links and websites, admin account deletion, server-side slug rules, and a privacy page built from the real data map with sample-data mockups. Wrote 123 Vitest tests first against an in-process Postgres. Verified the Neon SQL against PGlite: runs twice, keeps existing rows, and Drizzle reports no remaining diff.
+- Decided: Invites are delivered by copying a link from the dashboard, no email service. Admin is the `ADMIN_EMAIL` account. The admin sees counts, never individual scans. Retention gaps are stated honestly on the privacy page instead of promised away.
+- Next: Run `sql/002-invite-only-and-abuse-controls.sql` in Neon, set `ADMIN_EMAIL` (and optionally `SAFE_BROWSING_API_KEY`) in Vercel, confirm the CONFIRM notes in `src/content/legal.ts`, then the post-build pipeline. The PAT used this session should be revoked.
 
 ### 2026-10-10 (UI redesign and About page)
 Author: claude-vivaldi

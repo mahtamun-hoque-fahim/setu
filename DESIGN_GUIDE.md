@@ -76,12 +76,22 @@ Loaded with `@fontsource` in `src/app/layout.tsx` (static weights, no Google Fon
 
 - Page container: `max-w-7xl`, `px-4 sm:px-8`
 - Every page is wrapped in `PageShell`: skip link, header, `<main id="main">`, footer
-- Header signed out: wordmark, About, Sign in. Signed in: wordmark, username, Sign out. No navigation menu
-- Footer: wordmark, tagline, About, copyright
+- Header signed out: wordmark, About, Sign in (hidden on the sign-in and join pages). Signed in: wordmark, username, Sign out. No navigation menu
+- Footer: wordmark, tagline, About, Privacy, copyright
 
 ## Pages
 
-Landing, About, Sign in and create account, Dashboard, Link detail, 404. Mobile checked at 375px, desktop at 1280px.
+Landing, About, Privacy, Sign in, Request an invite, Join with an invite, Dashboard, Link detail, Admin (four tabs), 404 and the disabled-link notice. Mobile checked at 375px, desktop at 1280px. The admin and invite screens were built from this guide's patterns, without a Stitch pass.
+
+### Admin
+- Four tabs as links with `aria-current`, counts in the labels, never client-side tab state
+- Status shown as a bordered word badge (`pending`, `active`, `disabled`, `clean`), never colour alone
+- Destructive actions are two steps: the button asks for confirmation inline before it does anything
+- A freshly issued invite link is shown once in a `role="status"` box with a Copy button and a plain statement that only a hash is stored
+
+### Forms that take personal data
+- Say what is stored and link the privacy page next to the submit button
+- A honeypot field is hidden from sight, from the tab order and from screen readers (`aria-hidden`, `tabIndex={-1}`)
 
 ## Animation defaults
 
