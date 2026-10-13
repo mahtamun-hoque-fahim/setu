@@ -2,22 +2,31 @@ import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { links } from "@/lib/db/schema";
 import { newId } from "@/lib/id";
+import { issueInviteForEmail } from "@/lib/invites";
 
 /**
  * Dev-only seed. Never run this against a database with real users in it.
  * Creates the sign-up through Better Auth's own API rather than inserting
  * a row directly, so the password hash is one Better Auth can actually
- * verify against later.
+ * verify against later. Sign-up is invite-only, so it issues itself an
+ * invite first, exactly as the admin dashboard would.
  */
 async function seed() {
   const email = "fahim@example.com";
   const password = "change-this-before-real-use-123";
 
+  const db = getDb();
+  const { code } = await issueInviteForEmail(db, email);
+
   const signUp = await auth.api.signUpEmail({
-    body: { email, name: "Fahim", password },
+    // inviteCode is read by the invite check, it is not part of the typed body.
+    body: { email, name: "Fahim", password, inviteCode: code } as {
+      email: string;
+      name: string;
+      password: string;
+    },
   });
 
-  const db = getDb();
   await db.insert(links).values({
     id: newId(),
     slug: "mahtamun",

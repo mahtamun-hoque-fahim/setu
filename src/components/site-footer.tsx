@@ -19,6 +19,12 @@ export function SiteFooter() {
           >
             About
           </Link>
+          <Link
+            href="/privacy"
+            className="inline-flex min-h-11 items-center font-semibold hover:underline hover:decoration-2 hover:underline-offset-4"
+          >
+            Privacy
+          </Link>
           <span className="text-muted-foreground">
             © {new Date().getFullYear()} Setu
           </span>

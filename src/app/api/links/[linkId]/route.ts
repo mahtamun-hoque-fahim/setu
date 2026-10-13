@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { linkEdits, links } from "@/lib/db/schema";
 import { newId } from "@/lib/id";
-import { parseDestinationUrl } from "@/lib/validate-destination";
+import { destinationOptionsFromEnv, prepareDestination } from "@/lib/destination-check";
 
 /**
  * Edit where an existing link points.
@@ -33,12 +33,16 @@ export async function PATCH(
     return new Response("Send a JSON body", { status: 400 });
   }
 
-  const parsed = parseDestinationUrl(body.destinationUrl);
+  const db = getDb();
+
+  const parsed = await prepareDestination(
+    db,
+    body.destinationUrl,
+    destinationOptionsFromEnv(),
+  );
   if (!parsed.ok) {
     return new Response(parsed.error, { status: 400 });
   }
-
-  const db = getDb();
   const owned = and(eq(links.id, linkId), eq(links.ownerId, session.user.id));
 
   // Scoped to id AND ownerId, so a user can never edit someone else's link
@@ -60,7 +64,7 @@ export async function PATCH(
   const [updatedRows] = await db.batch([
     db
       .update(links)
-      .set({ destinationUrl: parsed.url })
+      .set({ destinationUrl: parsed.url, urlCheck: parsed.check })
       .where(owned)
       .returning(),
     db.insert(linkEdits).values({

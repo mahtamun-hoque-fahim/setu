@@ -107,8 +107,8 @@ export default function AboutPage() {
           </div>
 
           <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
-            <Link href="/dashboard" className={buttonPrimary}>
-              Try Setu
+            <Link href="/request-access" className={buttonPrimary}>
+              Request an invite
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
             <Link
