@@ -278,7 +278,11 @@ Status: `[ ]` in review
 - [ ] Run `sql/002-invite-only-and-abuse-controls.sql` in Neon BEFORE deploying this branch
 - [ ] Set `ADMIN_EMAIL` in Vercel, and optionally `SAFE_BROWSING_API_KEY`
 - [ ] Confirm the CONFIRM notes in `src/content/legal.ts`, then delete the WARDEN-DRAFT line in `src/app/privacy/page.tsx`
-- [ ] Post-build pipeline: aria audit, valley-of-death, sentinel, warden scan, Humanizer on the copy, light Airborne, Council POST, ticket-checker
+- [x] Accessibility: axe (WCAG 2.2 A and AA plus best practices) found no violations on any page at 1280px and 375px. Automated checks catch only part of it, a keyboard and screen reader pass is still worth doing
+- [x] Sentinel pass: upgraded Next.js 16.3.5 to 16.4.0 (production audit had a critical and a high finding, neither feature was used), added security headers, capped the name length
+- [x] Warden scan: PASS, with 3 MEDIUM items that are decisions for Fahim (privacy draft review, CONFIRM notes, whether to add a terms page)
+- [ ] Decide on rate limiting: Better Auth's default limiter is per server instance, so it is weak on serverless. Options: a database-backed limiter (new table) or Vercel Firewall rate-limit rules on `/api/access-requests` and `/api/auth/*`
+- [ ] Valley-of-death (spec against code), Humanizer on the About and privacy copy, light Airborne (robots and meta tags), Council POST, ticket-checker
 
 ---
 

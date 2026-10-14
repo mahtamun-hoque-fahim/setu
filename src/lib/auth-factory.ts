@@ -5,6 +5,8 @@ import type { Db } from "@/lib/db/types";
 import * as schema from "@/lib/db/schema";
 import { attachInviteUser, claimInvite } from "@/lib/invites";
 
+const MAX_NAME_LENGTH = 100;
+
 export const INVITE_REQUIRED_MESSAGE =
   "Setu is invite-only. Use the invite code you were sent, with the email it was sent to.";
 
@@ -33,6 +35,12 @@ export function createAuth(db: Db) {
           // bypassed by posting straight to /api/auth/sign-up/email. No code,
           // a wrong code, or a code for another email means no account.
           before: async (newUser, context) => {
+            // Checked before the invite is spent, so a bad name never burns a code.
+            if (typeof newUser.name !== "string" || newUser.name.length > MAX_NAME_LENGTH) {
+              throw new APIError("BAD_REQUEST", {
+                message: `Use a name of up to ${MAX_NAME_LENGTH} characters`,
+              });
+            }
             const inviteCode = (context?.body as { inviteCode?: unknown } | undefined)
               ?.inviteCode;
             const allowed = await claimInvite(db, {

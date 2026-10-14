@@ -93,6 +93,18 @@ describe("sign-up is invite-only", () => {
   });
 });
 
+describe("the name field", () => {
+  it("refuses an absurdly long name without spending the invite", async () => {
+    const { code } = await issueInviteForEmail(db, "rafi@example.com");
+    const res = await signUp({ email: "rafi@example.com", inviteCode: code, name: "x".repeat(101) });
+    expect(res.status).toBe(400);
+    expect(await users()).toHaveLength(0);
+    // The invite is still good for a sensible name.
+    const ok = await signUp({ email: "rafi@example.com", inviteCode: code });
+    expect(ok.status).toBe(200);
+  });
+});
+
 describe("existing accounts are not affected", () => {
   it("signs in with email and password and gets a session cookie, no invite needed", async () => {
     const { code } = await issueInviteForEmail(db, "rafi@example.com");
