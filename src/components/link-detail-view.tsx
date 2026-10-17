@@ -47,6 +47,17 @@ export function LinkDetailView({
           Back to your links
         </Link>
 
+        {link.status === "disabled" && (
+          <div role="status" className="border-2 border-border bg-muted p-4 shadow-hard-3">
+            <p className="font-bold">This link is disabled</p>
+            <p className="mt-1 text-sm leading-relaxed">
+              Anyone who scans it sees a notice instead of your destination.
+              {link.disabledReason ? ` Reason: ${link.disabledReason}.` : ""}{" "}
+              Contact the person who runs Setu if you think this is a mistake.
+            </p>
+          </div>
+        )}
+
         <div className="flex flex-col gap-4 border-b-2 border-border pb-6 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap items-center gap-4">
             <h1 className="break-all font-mono text-2xl font-bold tracking-tight md:text-3xl">

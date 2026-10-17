@@ -31,6 +31,18 @@ export async function GET(
     });
   }
 
+  // A disabled link never reveals its destination. Same shape as the
+  // unknown-slug response: a plain redirect to a notice page, uncached.
+  if (link.status === "disabled") {
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: new URL("/link-disabled", request.url).toString(),
+        "Cache-Control": "no-store",
+      },
+    });
+  }
+
   // Log the scan after the redirect response has already been sent,
   // so analytics never add latency to the person scanning the code.
   after(async () => {

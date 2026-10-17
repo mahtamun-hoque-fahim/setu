@@ -28,6 +28,7 @@ export default async function DashboardPage() {
       slug: links.slug,
       destinationUrl: links.destinationUrl,
       createdAt: links.createdAt,
+      status: links.status,
       scanCount: count(scans.id),
     })
     .from(links)

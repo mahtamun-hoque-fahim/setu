@@ -6,7 +6,7 @@ import {
   uniqueIndex,
   index,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 // --- Better Auth core tables ---
 // Table names are singular ("user", not "users") because Better Auth's
@@ -74,6 +74,14 @@ export const links = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").notNull().defaultNow(),
+    // "active" links redirect. "disabled" links show a notice instead, set
+    // by the admin (or automatically when a check flags the destination).
+    status: text("status").notNull().default("active"),
+    disabledReason: text("disabled_reason"),
+    disabledAt: timestamp("disabled_at"),
+    // Result of the destination safety check when the URL was last saved:
+    // "clean", "flagged" or "unchecked" (check unavailable or not configured).
+    urlCheck: text("url_check").notNull().default("unchecked"),
   },
   (table) => ({
     slugIdx: uniqueIndex("links_slug_idx").on(table.slug),
@@ -116,6 +124,56 @@ export const linkEdits = pgTable(
     ),
   }),
 );
+
+// --- Invite-only access ---
+
+export const inviteRequests = pgTable(
+  "invite_requests",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    email: text("email").notNull(), // always stored lowercase
+    note: text("note"),
+    // "pending", "approved" or "rejected"
+    status: text("status").notNull().default("pending"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    reviewedAt: timestamp("reviewed_at"),
+  },
+  (table) => ({
+    // One pending request per email, enforced by the database.
+    pendingEmailIdx: uniqueIndex("invite_requests_pending_email_idx")
+      .on(table.email)
+      .where(sql`${table.status} = 'pending'`),
+  }),
+);
+
+export const invites = pgTable(
+  "invites",
+  {
+    id: text("id").primaryKey(),
+    requestId: text("request_id").references(() => inviteRequests.id, {
+      onDelete: "set null",
+    }),
+    email: text("email").notNull(), // the one email this invite works for
+    // SHA-256 of the code. The code itself is shown once and never stored.
+    codeHash: text("code_hash").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    expiresAt: timestamp("expires_at").notNull(),
+    usedAt: timestamp("used_at"),
+    usedBy: text("used_by").references(() => user.id, { onDelete: "set null" }),
+    revokedAt: timestamp("revoked_at"),
+  },
+  (table) => ({
+    emailIdx: index("invites_email_idx").on(table.email),
+  }),
+);
+
+// Hosts nobody may point a link at, managed by the admin.
+export const blockedHosts = pgTable("blocked_hosts", {
+  host: text("host").primaryKey(),
+  reason: text("reason"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
 
 export const linksRelations = relations(links, ({ many, one }) => ({
   scans: many(scans),

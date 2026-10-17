@@ -40,9 +40,15 @@ export default function Home() {
                 redirect, private analytics, zero ads.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-                <Link href="/dashboard" className={buttonPrimary}>
-                  Get started
+                <Link href="/request-access" className={buttonPrimary}>
+                  Request an invite
                   <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+                <Link
+                  href="/login"
+                  className="inline-flex min-h-11 items-center text-sm font-semibold underline decoration-2 underline-offset-4 hover:text-primary"
+                >
+                  Sign in
                 </Link>
                 <Link
                   href="/about"
@@ -51,6 +57,9 @@ export default function Home() {
                   Why I built Setu
                 </Link>
               </div>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Setu is invite-only for now. I approve people I know.
+              </p>
             </div>
 
             <figure

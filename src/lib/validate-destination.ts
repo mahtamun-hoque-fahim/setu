@@ -5,6 +5,37 @@ export type DestinationResult =
 const MAX_LENGTH = 2048;
 
 /**
+ * Generic link shorteners. Letting a Setu link point at one would let anyone
+ * chain redirects to hide where a link really ends up.
+ */
+export const SHORTENER_HOSTS = [
+  "bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "is.gd", "v.gd",
+  "buff.ly", "rebrand.ly", "rb.gy", "cutt.ly", "shorturl.at", "tiny.cc",
+  "bl.ink", "lnkd.in", "s.id", "t.ly", "short.io", "soo.gd", "adf.ly",
+  "shorte.st", "qrco.de",
+];
+
+/** True for the host itself or any subdomain of it, never for a lookalike. */
+export function hostMatches(host: string, entries: readonly string[]): boolean {
+  const h = host.toLowerCase();
+  return entries.some((entry) => h === entry || h.endsWith(`.${entry}`));
+}
+
+function isIpAddress(hostname: string): boolean {
+  // new URL() already rewrites 2130706433 and 0x7f.1 into dotted form.
+  return hostname.startsWith("[") || /^\d{1,3}(\.\d{1,3}){3}$/.test(hostname);
+}
+
+function isLocalHostName(hostname: string): boolean {
+  return (
+    hostname === "localhost" ||
+    [".localhost", ".local", ".internal", ".localdomain"].some((suffix) =>
+      hostname.endsWith(suffix),
+    )
+  );
+}
+
+/**
  * Validates and normalizes a redirect destination. Shared by link creation
  * and link editing so the two paths can never drift apart.
  *
@@ -36,6 +67,27 @@ export function parseDestinationUrl(input: unknown): DestinationResult {
 
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
     return { ok: false, error: "Only http and https links are allowed" };
+  }
+
+  if (parsed.username || parsed.password) {
+    return {
+      ok: false,
+      error: "Links with a username or password in them are not allowed",
+    };
+  }
+
+  if (isIpAddress(parsed.hostname) || isLocalHostName(parsed.hostname)) {
+    return {
+      ok: false,
+      error: "Use a public website address, not an IP address or a local host",
+    };
+  }
+
+  if (hostMatches(parsed.hostname, SHORTENER_HOSTS)) {
+    return {
+      ok: false,
+      error: "Link shorteners cannot be used as a destination",
+    };
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;

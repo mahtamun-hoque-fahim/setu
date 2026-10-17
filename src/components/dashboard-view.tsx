@@ -12,6 +12,7 @@ export type DashboardLink = {
   slug: string;
   destinationUrl: string;
   createdAt: Date;
+  status: string;
   scanCount: number;
 };
 
@@ -67,6 +68,11 @@ export function DashboardView({
                     >
                       {host}/{link.slug}
                     </Link>
+                    {link.status === "disabled" && (
+                      <span className="shrink-0 border-2 border-border bg-background px-1.5 py-0.5 font-mono text-xs font-semibold">
+                        Disabled
+                      </span>
+                    )}
                     <CopyButton
                       variant="icon"
                       value={shortUrl(link.slug)}

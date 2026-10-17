@@ -22,7 +22,8 @@ A QR code and short-link redirect platform. Scan lands on the real destination i
 2. Install: `npm install`
 3. Copy `.env.example` to `.env.local` and fill in values (see PLANNER.md, Env Vars)
 4. Push the schema: `npm run db:push`
-5. Run dev: `npm run dev`
+5. Create your own account: sign-up is invite-only, so issue yourself an invite with `npm run invite -- you@example.com`, open the printed link, and set `ADMIN_EMAIL` to that same address to get the admin dashboard at `/admin`
+6. Run dev: `npm run dev`
 
 ## Env vars
 
@@ -34,6 +35,8 @@ DATABASE_URL_UNPOOLED
 BETTER_AUTH_SECRET
 BETTER_AUTH_URL
 NEXT_PUBLIC_APP_URL
+ADMIN_EMAIL
+SAFE_BROWSING_API_KEY   # optional
 ```
 
 ## Scripts
@@ -44,10 +47,12 @@ npm run build        # production build
 npm run start        # serve production build
 npm run lint         # ESLint
 npm run typecheck    # tsc --noEmit
+npm test             # Vitest, runs against an in-process Postgres, no setup needed
 npm run db:generate  # generate migration from schema
 npm run db:migrate   # apply migrations
 npm run db:push      # push schema directly, dev only
 npm run db:seed      # dev-only test user and one sample link
+npm run invite -- a@b.com   # issue an invite and print the join link
 ```
 
 ## Deploy
