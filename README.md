@@ -71,3 +71,7 @@ drizzle/             generated migrations
 ```
 
 For the detailed structure, see PLANNER.md, Architecture.
+
+## License
+
+All rights reserved. The source is public so it can be read, it is not licensed for reuse. See [LICENSE](LICENSE).
